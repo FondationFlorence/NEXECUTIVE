@@ -5,15 +5,20 @@
   <div class="page-head">
     <div>
       <p class="eyebrow">Workspace</p>
-      <h1 class="page-title">Deal intelligence overview</h1>
-      <p class="page-sub">Live M&amp;A signals across the targets you monitor.</p>
+      <h1 class="page-title"><%= thesis ? 'Targets matching your thesis' : 'Your shortlist' %></h1>
+      <p class="page-sub">Sourced M&amp;A signals across the targets you monitor — each traceable to an official document.</p>
     </div>
-    <a href="/targets" class="btn btn-gold">Find targets</a>
+    <a href="/targets" class="btn btn-gold">Screen more targets</a>
   </div>
 
-  <% if (trial.isExpired) { %>
+  <% if (needsThesis) { %>
+    <div class="banner">
+      <span><strong>Set your acquisition thesis</strong> to get an instant shortlist of matching targets — sourced and ranked.</span>
+      <a href="/onboarding" class="btn btn-sm btn-gold">Build my shortlist</a>
+    </div>
+  <% } else if (trial.isExpired) { %>
     <div class="banner warn">
-      <span>Your free trial has ended. Subscribe to keep monitoring and generating briefs.</span>
+      <span>Your free trial has ended. Subscribe to keep monitoring and generating sourced briefs.</span>
       <a href="/#pricing" class="btn btn-sm">View plans</a>
     </div>
   <% } else if (!trial.isPaid) { %>
@@ -24,25 +29,24 @@
   <% } %>
 
   <div class="stat-strip">
-    <div class="stat"><div class="stat-label">Universe monitored</div><div class="stat-value"><%= fmt.num(stats.universe) %></div></div>
-    <div class="stat"><div class="stat-label">On your watchlist</div><div class="stat-value"><%= stats.watching %></div></div>
-    <div class="stat"><div class="stat-label">Signals · 30d</div><div class="stat-value gold"><%= stats.signals30d %></div></div>
-    <div class="stat"><div class="stat-label">Hot targets</div><div class="stat-value gold"><%= stats.hot %></div></div>
+    <div class="stat"><div class="stat-label">Monitored targets</div><div class="stat-value"><%= fmt.num(stats.universe) %></div></div>
+    <div class="stat"><div class="stat-label">Your shortlist</div><div class="stat-value"><%= stats.watching %></div></div>
+    <div class="stat"><div class="stat-label">Sourced signals · 30d</div><div class="stat-value gold"><%= stats.signals30d %></div></div>
+    <div class="stat"><div class="stat-label">Ripe now</div><div class="stat-value gold"><%= stats.hot %></div></div>
   </div>
 
   <div class="grid grid-2">
-    <!-- Watchlist -->
     <section class="panel">
       <div class="panel-head">
-        <span class="panel-title">Your watchlist</span>
+        <span class="panel-title">Your shortlist</span>
         <a href="/targets" class="panel-link">Browse universe →</a>
       </div>
 
       <% if (watchlist.length === 0) { %>
         <div class="empty">
           <h3>No targets yet</h3>
-          <p>Add companies from the target universe to start monitoring them.</p>
-          <p style="margin-top:1rem;"><a href="/targets" class="btn btn-gold">Screen targets</a></p>
+          <p>Set your thesis to get a ranked, sourced shortlist in seconds.</p>
+          <p style="margin-top:1rem;"><a href="/onboarding" class="btn btn-gold">Build my shortlist</a></p>
         </div>
       <% } else { %>
         <% watchlist.forEach(function(c) { %>
@@ -52,11 +56,13 @@
               <div class="target-meta">
                 <span class="tag sector"><%= c.sector %></span>
                 <span class="dot"><%= c.country %></span>
-                <% if (c.signals.length) { %><span class="dot"><%= c.signals.length %> signal<%= c.signals.length === 1 ? '' : 's' %></span><% } %>
-                <span class="dot"><%= fmt.eur(c.revenue_eur) %> rev</span>
+                <% if (c.owner_age) { %><span class="dot">owner <%= c.owner_age %></span><% } %>
+                <% if (c.availability) { %><span class="dot"><%= c.availability %></span><% } %>
+                <% if (c.signals.length) { %><span class="dot"><%= c.signals.length %> sourced signal<%= c.signals.length === 1 ? '' : 's' %></span><% } %>
               </div>
             </div>
             <div class="target-side">
+              <% if (thesis) { %><span class="match-badge <%= c.match.match >= 70 ? 'strong' : '' %>"><%= c.match.match %>% fit</span><% } %>
               <span class="score score-<%= c.score.band.toLowerCase() %>"><b><%= c.score.total %></b>/100</span>
             </div>
           </div>
@@ -64,15 +70,14 @@
       <% } %>
     </section>
 
-    <!-- Right column -->
     <div class="grid">
       <section class="panel">
         <div class="panel-head">
-          <span class="panel-title">Live signals</span>
+          <span class="panel-title">Live sourced signals</span>
           <a href="/alerts" class="panel-link">All →</a>
         </div>
         <% if (recentAlerts.length === 0) { %>
-          <p class="page-sub">No signals on your watchlist yet.</p>
+          <p class="page-sub">No signals on your shortlist yet.</p>
         <% } else { %>
           <% recentAlerts.slice(0, 6).forEach(function(a) { %>
             <div class="alert-item">
@@ -82,7 +87,7 @@
                 <div class="alert-foot">
                   <a href="/company/<%= a.company_slug %>" class="reg-chip" style="text-decoration:none;color:var(--gold-dim)"><%= a.company_name %></a>
                   <span class="sev-chip <%= fmt.sev(a.severity) %>"><%= a.severity %></span>
-                  <% if (a.regulator) { %><span class="reg-chip"><%= a.regulator %></span><% } %>
+                  <% if (a.source_url) { %><a class="src-link" href="<%= a.source_url %>" target="_blank" rel="noopener"><%= a.source || 'source' %></a><% } else if (a.source) { %><span class="reg-chip"><%= a.source %></span><% } %>
                   <span><%= fmt.timeAgo(a.signal_date) %></span>
                 </div>
               </div>

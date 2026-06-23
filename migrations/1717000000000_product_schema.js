@@ -29,6 +29,11 @@ module.exports = {
         founded_year  INTEGER,
         growth_rate   NUMERIC(5,1),
         sector_heat   INTEGER DEFAULT 50,
+        ebitda_eur    BIGINT,
+        owner_age     INTEGER,
+        availability  VARCHAR(30),          -- off-market | exploring | for-sale | rumoured
+        registry      VARCHAR(80),          -- official registry the entity is filed in
+        registry_url  TEXT,                 -- primary-source URL for the company record
         description   TEXT,
         website       VARCHAR(255),
         created_at    TIMESTAMPTZ DEFAULT NOW()
@@ -59,7 +64,8 @@ module.exports = {
         severity    VARCHAR(20) NOT NULL DEFAULT 'medium',
         title       VARCHAR(255) NOT NULL,
         detail      TEXT,
-        source      VARCHAR(120),
+        source      VARCHAR(120),         -- name of the primary source (registry, CFNEWS…)
+        source_url  TEXT,                 -- link to the official document / article
         regulator   VARCHAR(40),
         signal_date TIMESTAMPTZ DEFAULT NOW(),
         created_at  TIMESTAMPTZ DEFAULT NOW()
@@ -106,6 +112,21 @@ module.exports = {
         frequency  VARCHAR(20) NOT NULL DEFAULT 'weekly',
         hour_utc   INTEGER NOT NULL DEFAULT 8,
         enabled    BOOLEAN NOT NULL DEFAULT true,
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+
+    // --- Acquisition thesis (drives the instant shortlist) -------------
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS theses (
+        id         SERIAL PRIMARY KEY,
+        user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+        sectors    TEXT[],
+        countries  TEXT[],
+        rev_min    BIGINT,
+        rev_max    BIGINT,
+        keywords   TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       )
     `);

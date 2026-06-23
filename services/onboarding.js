@@ -1,49 +1,47 @@
 /**
- * New-user onboarding: give a fresh trial account an immediately useful
- * workspace — a starter watchlist of high-signal targets, a couple of
- * pipeline entries, and a default weekly digest. Best-effort: callers should
- * not let a seeding failure block signup.
+ * Thesis-driven onboarding (activation).
+ *
+ * The aha is immediate: the searcher gives us their thesis and we hand back a
+ * ranked, sourced shortlist of matching targets — value before the trial clock
+ * matters. seedFromThesis builds that shortlist into their workspace.
  */
-const { pool } = require('../db/index');
+const companies = require('../db/companies');
+const alerts = require('../db/alerts');
 const watchlist = require('../db/watchlist');
 const pipeline = require('../db/pipeline');
 const digests = require('../db/digests');
-const alerts = require('../db/alerts');
 const { scoreCompany } = require('./scoring');
+const { rankByThesis } = require('./thesis');
 
-/** Pick the most interesting targets: high sector heat with live signals. */
-async function pickStarterCompanies(limit = 6) {
-  const r = await pool.query(
-    `SELECT c.*, COALESCE(a.cnt, 0) AS alert_count
-       FROM companies c
-       LEFT JOIN LATERAL (
-         SELECT COUNT(*) AS cnt FROM alerts al
-          WHERE al.company_id = c.id AND al.signal_date > NOW() - interval '45 days'
-       ) a ON true
-      ORDER BY a.cnt DESC, c.sector_heat DESC
-      LIMIT $1`,
-    [limit],
+/** Score + thesis-rank the whole universe; return the strongest matches. */
+async function buildShortlist(thesis, limit = 10) {
+  const all = await companies.search({ limit: 500 });
+  const ids = all.map((c) => c.id);
+  const signalsByCompany = await alerts.forCompanyIds(ids);
+  const scored = all.map((c) => {
+    const signals = signalsByCompany[c.id] || [];
+    return { ...c, signals, score: scoreCompany(c, { signals }) };
+  });
+  // Rank by thesis match, tie-break on intrinsic ripeness score.
+  const ranked = rankByThesis(scored, thesis).sort(
+    (a, b) => b.thesis.match - a.thesis.match || b.score.total - a.score.total,
   );
-  return r.rows;
+  return ranked.slice(0, limit);
 }
 
-async function seedStarterWatchlist(userId) {
-  const companies = await pickStarterCompanies(6);
-  if (companies.length === 0) return;
+/** Seed the user's workspace from their thesis: watchlist + a little pipeline. */
+async function seedFromThesis(userId, thesis) {
+  const shortlist = await buildShortlist(thesis, 10);
+  if (shortlist.length === 0) return shortlist;
 
-  const signalsByCompany = await alerts.forCompanyIds(companies.map((c) => c.id));
-
-  for (const c of companies) {
-    const score = scoreCompany(c, { signals: signalsByCompany[c.id] || [] });
-    await watchlist.add(userId, c.id, score.total);
+  for (const c of shortlist) {
+    await watchlist.add(userId, c.id, c.score.total);
   }
-
-  // Seed a small live pipeline from the two strongest targets.
-  if (companies[0]) await pipeline.addCompany(userId, companies[0].id, { stage: 'screening', next_step: 'Confirm valuation range' });
-  if (companies[1]) await pipeline.addCompany(userId, companies[1].id, { stage: 'sourced', next_step: 'Build outreach angle' });
-
-  // Default delivery: weekly briefing.
+  if (shortlist[0]) await pipeline.addCompany(userId, shortlist[0].id, { stage: 'screening', next_step: 'Confirm accounts + ownership' });
+  if (shortlist[1]) await pipeline.addCompany(userId, shortlist[1].id, { stage: 'sourced', next_step: 'Draft owner approach' });
   await digests.upsert(userId, { frequency: 'weekly', hour_utc: 8, enabled: true });
+
+  return shortlist;
 }
 
-module.exports = { seedStarterWatchlist };
+module.exports = { buildShortlist, seedFromThesis };

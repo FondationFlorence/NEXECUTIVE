@@ -30,9 +30,9 @@ router.post('/pause', express.json(), async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'email required' });
 
-  // Mark all 4 bits as sent — stops any future emails
+  // Stop all nurture — both the legacy day bits and the behavioral branches.
   await pool.query(
-    `UPDATE users SET email_sequence_sent = 15 WHERE LOWER(email) = LOWER($1)`,
+    `UPDATE users SET email_sequence_sent = 15, behavioral_email_sent = 3 WHERE LOWER(email) = LOWER($1)`,
     [email],
   );
   res.json({ ok: true });

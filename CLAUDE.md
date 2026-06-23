@@ -1,9 +1,19 @@
 # Nexecutive — CLAUDE.md
 
 ## What this app does
-Nexecutive is an autonomous M&A intelligence platform for corporate development teams.
-AI agents monitor M&A targets, surface opportunities, and deliver executive briefings —
-24/7, without manual research.
+Nexecutive is sourced acquisition intelligence for **one buyer**: the searcher / ETA /
+independent sponsor acquiring a single lower-mid-market European business. It surfaces
+off-market, owner-operated targets with real succession signals, ranks them against the
+buyer's thesis, and traces **every signal to its primary source** (Companies House,
+BODACC, Infogreffe, Firmenbuch, KVK, CRO, CFNEWS). Verifiability is the product.
+
+Positioning bets (single ICP, one product, one pain):
+1. One buyer — searcher/ETA/sponsor. (Dropped the lawyer + corp-dev ICPs.)
+2. Verifiability = product. Every claim links to an official document. Depth over a
+   "3.2M companies" vanity count.
+3. Activation inverted: thesis in → sourced shortlist out, immediately (`/onboarding`).
+4. Channel: Meta Pixel removed; lean on GEO/AEO (structured data, FAQ, `public/llms.txt`).
+5. Behavioral nurture: activated → upgrade case; dormant → tailored sourced example brief.
 
 ## Stack
 Express.js + EJS + Neon PostgreSQL + Render
@@ -21,36 +31,42 @@ Express.js + EJS + Neon PostgreSQL + Render
 - `public/css/` — Stylesheets (theme.css = landing/auth, app.css = product workspace)
 
 ## Product (authenticated, all routes require a session)
-- `GET /dashboard` — overview: watchlist (scored), live signals, pipeline summary, stats
-- `GET /targets` — Target Screening Engine: filterable universe ranked by fit score
-- `GET /company/:slug` — target detail: fundamentals, score breakdown, signals, AI deal brief
-- `GET /alerts` — signal feed across the user's watchlist
+- `GET /onboarding` — thesis intake → instant sourced shortlist (the activation aha)
+- `GET /dashboard` — overview: thesis shortlist (scored + % thesis fit), live sourced signals, pipeline, stats
+- `GET /targets` — screening engine: filterable universe, fit score + thesis-match %, registry source links
+- `GET /company/:slug` — target detail: fundamentals (EBITDA/owner age/availability), score breakdown, sourced signal trail, AI brief, "Verify on <registry>"
+- `GET /alerts` — sourced signal feed (every alert links to its primary source)
 - `GET /pipeline` — kanban deal pipeline (sourced → screening → diligence → term_sheet → closed/passed)
-- `GET /settings` — digest delivery config + account
-- Actions: POST /app/watchlist/(add|remove), /app/briefs/generate, /app/pipeline/(add|move|remove), /app/settings/digest
+- `GET /settings` — acquisition thesis editor + digest config + account
+- Actions: POST /onboarding, /app/watchlist/(add|remove), /app/briefs/generate, /app/pipeline/(add|move|remove), /app/settings/(thesis|digest). Watchlist-add, brief-generate, pipeline-add mark the user activated.
 
 ## Engine
-- `services/scoring.js` — explainable 0-100 acquisition-fit score (strategic fit, growth, size fit, transactability, signal momentum). Deterministic.
-- `services/briefs.js` — Deal Brief Agent. Uses OpenAI (OPENAI_API_KEY, model OPENAI_BRIEF_MODEL) with a deterministic template fallback so it works without a key.
-- `jobs/signal-monitor.js` — autonomous monitor that emits fresh sector-aware signals (every 6h via polsia.toml). Real data sources plug in here.
+- `services/scoring.js` — explainable 0-100 ripeness score for searchers: succession window (owner age + availability), consolidation heat, size fit (lower-mid sweet spot), cash quality (EBITDA margin), signal momentum. Deterministic.
+- `services/thesis.js` — matches a company to the buyer's thesis (sectors/countries/revenue band/keywords) → 0-100 fit %, and ranks the shortlist.
+- `services/briefs.js` — Deal Brief Agent. Cites primary sources (Sources section with links). OpenAI (OPENAI_API_KEY, OPENAI_BRIEF_MODEL) + deterministic template fallback.
+- `services/onboarding.js` — builds the sourced shortlist from a thesis into the workspace.
+- `jobs/signal-monitor.js` — autonomous monitor; emits fresh SOURCED signals (registry or CFNEWS) every 6h.
+- `jobs/trial-email-scheduler.js` — behavioral nurture (activated vs dormant), daily. `EMAIL_DRY_RUN=true` logs instead of sending.
 
 ## Database
-- `companies` — monitored target universe (sector, country, financials, ownership, sector_heat)
-- `users` — accounts; trial_start_date + email_sequence_sent drive the nurture sequence
-- `watchlist` — companies a user actively monitors (cached fit_score)
-- `alerts` — M&A signals per company (type, severity, regulator)
-- `deal_briefs` — generated executive briefings
-- `pipeline_deals` — a user's live deal pipeline
+- `companies` — target universe; financials + ebitda_eur, owner_age, availability, registry, registry_url
+- `users` — accounts; trial_start_date, email_sequence_sent, activated_at, behavioral_email_sent
+- `theses` — per-user acquisition thesis (sectors[], countries[], rev_min/max, keywords)
+- `watchlist` — the user's shortlist (cached fit_score)
+- `alerts` — signals per company (type, severity, source, **source_url**, regulator)
+- `deal_briefs` — generated sourced briefings
+- `pipeline_deals` — the live pipeline
 - `digest_schedules` — per-user briefing delivery config
 - `_migrations` — tracks applied migrations
 
 ## Environment variables
 - `DATABASE_URL` (required), `SESSION_SECRET` (required in production)
 - `OPENAI_API_KEY` (optional — enables narrative briefs), `OPENAI_BRIEF_MODEL` (default gpt-4o-mini)
-- `POSTMARK_API_KEY` (trial emails), `POLSIA_IN_PROCESS_CRONS_ENABLED` (gate cron jobs)
+- `POSTMARK_API_KEY` (nurture emails), `EMAIL_DRY_RUN` (log instead of send), `POLSIA_IN_PROCESS_CRONS_ENABLED` (gate cron jobs)
 
 ## Recent changes
-- 2026-06-23 — Built the analysis product behind the landing page: target universe + screening engine (scoring.js), per-company detail with AI deal briefs (briefs.js, OpenAI + template fallback), watchlist, alerts feed, pipeline tracker, digest settings. New tables: companies/watchlist/alerts/deal_briefs/pipeline_deals/digest_schedules + seed. New router routes/app.js, autonomous jobs/signal-monitor.js. New-user onboarding seeds a starter workspace.
+- 2026-06-23 — Strategic pivot to one ICP (searcher/ETA/sponsor) with verifiability as the product. Every signal carries source + source_url (registries + CFNEWS); seed re-built for European lower-mid-market targets (FR/UK/DE/AT/NL/IE). New: thesis intake → instant shortlist (/onboarding, services/thesis.js, theses table). Scoring re-tuned around succession. Briefs cite sources. Behavioral email nurture (activated/dormant) replaces the fixed-day cadence; activation tracked. Removed Meta Pixel; added public/llms.txt for AEO. Pricing reframed (Searcher/Fund/Sponsor) + FAQ schema rewritten.
+- 2026-06-23 — Built the analysis product behind the landing page: target universe + screening engine (scoring.js), per-company detail with AI deal briefs (briefs.js, OpenAI + template fallback), watchlist, alerts feed, pipeline tracker, digest settings. New tables + seed. New router routes/app.js, autonomous jobs/signal-monitor.js.
 - 2026-06-23 — Fixes: added missing trial columns to migrations; corrected getUsersNeedingEmail (trial users have subscription_status='trial', not NULL); added GET /login and /signup pages; middleware/auth exports a callable function; replaced hardcoded SESSION_SECRET fallback (random in dev, required in prod); added urlencoded body parsing + error handler.
 - 2026-06-23 — Trial-to-paid email sequence (4-email automation on days 1/7/13/15). API: POST /api/trial-emails/register, POST /api/trial-emails/pause, GET /api/trial-emails/status/:email. Daily cron at 08:00 UTC via polsia.toml.
 - 2026-06-23 — Added self-serve pricing section (partials/pricing.ejs). Three tiers (Solo/Team/Enterprise), annual/monthly toggle, no contact-sales.

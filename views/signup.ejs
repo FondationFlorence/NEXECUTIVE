@@ -186,7 +186,7 @@
         });
 
         if (res.status === 201) {
-          window.location.href = '/dashboard';
+          window.location.href = '/onboarding';
         } else {
           const body = await res.json().catch(() => ({}));
           formError.textContent = body.error || 'Signup failed. Please try again.';

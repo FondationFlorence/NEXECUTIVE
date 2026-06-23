@@ -1,0 +1,52 @@
+<%- include('../partials/app-head', { title: 'Your thesis — Nexecutive' }) %>
+<%- include('../partials/app-nav') %>
+
+<main class="app-shell">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Start here · 60 seconds</p>
+      <h1 class="page-title">What are you hunting?</h1>
+      <p class="page-sub">Give us your acquisition thesis and we'll hand back a ranked shortlist from <%= total %> monitored European targets — every one traced to an official source. No waiting.</p>
+    </div>
+  </div>
+
+  <form method="post" action="/onboarding" class="panel" style="max-width:760px;">
+    <div class="form-row" style="margin-bottom:1.5rem;">
+      <label>Sectors <span style="color:var(--text-muted);text-transform:none;letter-spacing:0;">(pick any — leave empty for all)</span></label>
+      <div class="choice-grid">
+        <% sectors.forEach(function(s){ %>
+          <label class="choice"><input type="checkbox" name="sectors" value="<%= s %>" <%= (thesis && (thesis.sectors||[]).includes(s)) ? 'checked' : '' %>> <%= s %></label>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-bottom:1.5rem;">
+      <label>Geographies</label>
+      <div class="choice-grid">
+        <% countries.forEach(function(c){ %>
+          <label class="choice"><input type="checkbox" name="countries" value="<%= c %>" <%= (thesis && (thesis.countries||[]).includes(c)) ? 'checked' : '' %>> <%= c %></label>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-bottom:1.5rem;">
+      <label>Revenue band (€M)</label>
+      <div class="range-row">
+        <input type="number" name="rev_min" min="0" step="0.5" placeholder="min" value="<%= thesis && thesis.rev_min ? (thesis.rev_min/1e6) : '' %>">
+        <span>to</span>
+        <input type="number" name="rev_max" min="0" step="0.5" placeholder="max" value="<%= thesis && thesis.rev_max ? (thesis.rev_max/1e6) : '' %>">
+        <span>€M revenue</span>
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-bottom:1.75rem;">
+      <label>Thesis keywords <span style="color:var(--text-muted);text-transform:none;letter-spacing:0;">(optional)</span></label>
+      <input type="text" name="keywords" placeholder="e.g. recurring revenue, succession, asset-light services" value="<%= thesis ? (thesis.keywords||'') : '' %>" style="width:100%;">
+    </div>
+
+    <button type="submit" class="btn btn-gold">Show me my targets →</button>
+    <p class="verify-note" style="margin-top:1rem;">🔒 Every signal links to its primary source — Companies House, BODACC, Infogreffe, CFNEWS.</p>
+  </form>
+</main>
+</body>
+</html>

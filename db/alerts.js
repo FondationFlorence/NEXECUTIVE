@@ -37,11 +37,11 @@ async function forCompanyIds(ids) {
   return map;
 }
 
-async function create({ company_id, type, severity = 'medium', title, detail, source, regulator }) {
+async function create({ company_id, type, severity = 'medium', title, detail, source, source_url, regulator }) {
   const r = await pool.query(
-    `INSERT INTO alerts (company_id, type, severity, title, detail, source, regulator)
-     VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-    [company_id, type, severity, title, detail || null, source || null, regulator || null],
+    `INSERT INTO alerts (company_id, type, severity, title, detail, source, source_url, regulator)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+    [company_id, type, severity, title, detail || null, source || null, source_url || null, regulator || null],
   );
   return r.rows[0];
 }

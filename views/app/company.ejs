@@ -9,21 +9,22 @@
       <p class="eyebrow"><%= company.sector %> · <%= company.hq_city ? company.hq_city + ', ' : '' %><%= company.country %></p>
       <h1 class="page-title"><%= company.name %></h1>
       <p class="page-sub" style="max-width:60ch;"><%= company.description || '' %></p>
-      <div style="margin-top:0.9rem;">
+      <div style="margin-top:0.9rem;display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
         <span class="score score-<%= score.band.toLowerCase() %>"><b><%= score.total %></b>/100 · <%= score.band %></span>
+        <% if (company.registry_url) { %>
+          <a class="src-link" href="<%= company.registry_url %>" target="_blank" rel="noopener">Verify on <%= company.registry %></a>
+        <% } %>
       </div>
     </div>
     <div class="company-actions">
       <% if (watched) { %>
         <form method="post" action="/app/watchlist/remove" class="inline-form">
-          <input type="hidden" name="company_id" value="<%= company.id %>">
-          <input type="hidden" name="return_to" value="/company/<%= company.slug %>">
+          <input type="hidden" name="company_id" value="<%= company.id %>"><input type="hidden" name="return_to" value="/company/<%= company.slug %>">
           <button class="btn btn-ghost">Watching ✓</button>
         </form>
       <% } else { %>
         <form method="post" action="/app/watchlist/add" class="inline-form">
-          <input type="hidden" name="company_id" value="<%= company.id %>">
-          <input type="hidden" name="return_to" value="/company/<%= company.slug %>">
+          <input type="hidden" name="company_id" value="<%= company.id %>"><input type="hidden" name="return_to" value="/company/<%= company.slug %>">
           <button class="btn">+ Watch</button>
         </form>
       <% } %>
@@ -31,8 +32,7 @@
         <a href="/pipeline" class="btn btn-ghost">In pipeline →</a>
       <% } else { %>
         <form method="post" action="/app/pipeline/add" class="inline-form">
-          <input type="hidden" name="company_id" value="<%= company.id %>">
-          <input type="hidden" name="return_to" value="/company/<%= company.slug %>">
+          <input type="hidden" name="company_id" value="<%= company.id %>"><input type="hidden" name="return_to" value="/company/<%= company.slug %>">
           <button class="btn">+ Pipeline</button>
         </form>
       <% } %>
@@ -42,20 +42,19 @@
   <section class="panel" style="margin-bottom:1.25rem;">
     <div class="facts">
       <div><div class="fact-label">Revenue</div><div class="fact-value"><%= fmt.eur(company.revenue_eur) %></div></div>
-      <div><div class="fact-label">ARR</div><div class="fact-value"><%= fmt.eur(company.arr_eur) %></div></div>
-      <div><div class="fact-label">Growth</div><div class="fact-value"><%= company.growth_rate != null ? company.growth_rate + '% YoY' : '—' %></div></div>
-      <div><div class="fact-label">Employees</div><div class="fact-value"><%= fmt.num(company.employees) %></div></div>
-      <div><div class="fact-label">Valuation</div><div class="fact-value"><%= fmt.eur(company.valuation_eur) %></div></div>
-      <div><div class="fact-label">Funding stage</div><div class="fact-value"><%= company.funding_stage || '—' %></div></div>
+      <div><div class="fact-label">EBITDA</div><div class="fact-value"><%= fmt.eur(company.ebitda_eur) %><% if (company.ebitda_eur && company.revenue_eur) { %> <span style="color:var(--text-muted);font-size:0.8rem;">(<%= Math.round(company.ebitda_eur/company.revenue_eur*100) %>%)</span><% } %></div></div>
+      <div><div class="fact-label">Owner age</div><div class="fact-value"><%= company.owner_age || '—' %></div></div>
+      <div><div class="fact-label">Availability</div><div class="fact-value"><%= fmt.title(company.availability) %></div></div>
       <div><div class="fact-label">Ownership</div><div class="fact-value"><%= fmt.title(company.ownership) %></div></div>
+      <div><div class="fact-label">Employees</div><div class="fact-value"><%= fmt.num(company.employees) %></div></div>
       <div><div class="fact-label">Founded</div><div class="fact-value"><%= company.founded_year || '—' %></div></div>
+      <div><div class="fact-label">Indicative value</div><div class="fact-value"><%= fmt.eur(company.valuation_eur) %></div></div>
       <div><div class="fact-label">Sector heat</div><div class="fact-value"><%= company.sector_heat %>/100</div></div>
     </div>
   </section>
 
   <div class="grid grid-2">
     <div class="grid">
-      <!-- Score breakdown -->
       <section class="panel">
         <div class="panel-head"><span class="panel-title">Fit score breakdown</span><span class="score score-<%= score.band.toLowerCase() %>"><b><%= score.total %></b>/100</span></div>
         <div class="score-bars">
@@ -69,10 +68,9 @@
         </div>
       </section>
 
-      <!-- Deal brief -->
       <section class="panel" id="brief">
         <div class="panel-head">
-          <span class="panel-title">Deal brief</span>
+          <span class="panel-title">Acquisition brief</span>
           <form method="post" action="/app/briefs/generate" class="inline-form">
             <input type="hidden" name="company_id" value="<%= company.id %>">
             <button class="btn btn-sm <%= brief ? '' : 'btn-gold' %>"><%= brief ? 'Regenerate' : 'Generate brief' %></button>
@@ -80,19 +78,18 @@
         </div>
         <% if (brief) { %>
           <div class="brief"><%- fmt.mdLite(brief.content) %></div>
-          <div class="brief-meta">Generated <%= fmt.timeAgo(brief.created_at) %> · model: <%= brief.model %></div>
+          <div class="brief-meta">Generated <%= fmt.timeAgo(brief.created_at) %> · model: <%= brief.model %> · every claim links to a primary source</div>
         <% } else { %>
           <div class="empty">
             <h3>No brief yet</h3>
-            <p>Generate an executive-ready briefing from this target's fundamentals and live signals.</p>
+            <p>Generate a sourced acquisition brief from this target's fundamentals and signal trail.</p>
           </div>
         <% } %>
       </section>
     </div>
 
-    <!-- Signals -->
     <section class="panel">
-      <div class="panel-head"><span class="panel-title">Signals (<%= signals.length %>)</span></div>
+      <div class="panel-head"><span class="panel-title">Signal trail (<%= signals.length %>)</span></div>
       <% if (signals.length === 0) { %>
         <p class="page-sub">No signals detected in the monitoring window.</p>
       <% } else { %>
@@ -105,8 +102,9 @@
               <div class="alert-foot">
                 <span class="sev-chip <%= fmt.sev(a.severity) %>"><%= a.severity %></span>
                 <span class="reg-chip"><%= fmt.title(a.type) %></span>
-                <% if (a.regulator) { %><span class="reg-chip"><%= a.regulator %></span><% } %>
-                <% if (a.source) { %><span><%= a.source %></span><% } %>
+                <% if (a.source_url) { %>
+                  <a class="src-link" href="<%= a.source_url %>" target="_blank" rel="noopener"><%= a.source || 'source' %></a>
+                <% } else if (a.source) { %><span class="reg-chip"><%= a.source %></span><% } %>
                 <span><%= fmt.timeAgo(a.signal_date) %></span>
               </div>
             </div>

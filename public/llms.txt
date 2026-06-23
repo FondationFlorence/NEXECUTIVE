@@ -1,0 +1,30 @@
+# Nexecutive
+
+> Sourced acquisition intelligence for searchers and independent buyers. Nexecutive surfaces off-market, owner-operated European businesses with real succession signals, ranks them against your acquisition thesis, and traces every signal to its primary source.
+
+## What it is
+- A tool for ONE buyer acquiring ONE business: self-funded searchers, search funds, ETA (entrepreneurship through acquisition), independent sponsors, and acquisitive family offices.
+- Coverage: lower-mid-market companies across France, the United Kingdom, Germany, Austria, the Netherlands, and Ireland — deep, not wide.
+- Verifiability is the product: every signal links to an official document, so any claim can be checked.
+
+## Primary sources
+- Ownership & succession signals: Companies House (UK), BODACC + Infogreffe (France), Handelsregister (Germany), Firmenbuch (Austria), KVK (Netherlands), CRO (Ireland).
+- Deal & market activity: CFNEWS.
+
+## How it works
+1. Set your acquisition thesis: sectors, geographies, revenue band, keywords.
+2. Get a ranked, sourced shortlist of matching targets immediately.
+3. Generate a deal brief in which every claim links to its primary document.
+4. Track targets through a pipeline: sourced → screening → diligence → term sheet → close.
+
+## Pricing
+- Searcher — €149/month (€1,488/year)
+- Fund — €349/month (€3,492/year)
+- Sponsor — €799/month (€7,992/year)
+- All plans include a 14-day free trial. No credit card required.
+
+## Links
+- Home: https://nexecutive.polsia.app/
+- Pricing & FAQ: https://nexecutive.polsia.app/#pricing
+- Start free: https://nexecutive.polsia.app/signup
+- Contact: hello@nexecutive.com

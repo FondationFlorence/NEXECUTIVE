@@ -1,83 +1,83 @@
 /**
- * Target Screening Engine.
+ * Acquisition-fit scoring for the searcher / ETA buyer.
  *
- * Produces an explainable 0-100 acquisition-fit score for a company from its
- * fundamentals plus recent signal momentum. Deterministic — the same inputs
- * always yield the same score, so the breakdown can be shown to the user.
+ * Produces an explainable 0-100 "ripeness" score for a lower-mid-market
+ * target from its fundamentals plus recent sourced signals. Deterministic —
+ * same inputs always yield the same score, so the breakdown is shown to the
+ * user and every point traces to a fact.
  *
  *   scoreCompany(company, { signals }) -> {
  *     total, band, components: [{ key, label, score, max, note }], drivers
  *   }
  *
- * Component weights (sum = 100):
- *   strategicFit   25   sector consolidation heat
- *   growth         25   YoY growth rate
- *   sizeFit        20   mid-market sweet-spot on revenue
- *   ownership      15   how transactable the ownership structure is
- *   momentum       15   recent M&A signal activity
+ * Component weights (sum = 100), tuned for an individual acquirer buying ONE
+ * business:
+ *   succession    25   owner age + sale readiness — the searcher's #1 driver
+ *   consolidation 20   sector roll-up heat (tailwind / exit competition)
+ *   sizeFit       20   lower-mid-market sweet spot on revenue
+ *   quality       15   EBITDA margin (cash quality of the business)
+ *   momentum      20   recent, sourced signal activity
  */
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 const round = (n) => Math.round(n);
 
-const OWNERSHIP_SCORE = {
-  'pe-backed': 15,     // sponsors run a clock — highly transactable
-  'vc-backed': 13,     // venture timelines drive exits
-  'family-owned': 12,  // succession events open windows
-  'private': 9,
-  'public': 4,         // hardest to acquire cleanly
-};
-
 const SEVERITY_WEIGHT = { high: 6, medium: 3, low: 1 };
 
-function strategicFit(company) {
+const AVAIL_READINESS = {
+  'for-sale': 1, exploring: 0.8, rumoured: 0.7, 'off-market': 0.5,
+};
+
+function succession(company) {
+  const age = Number(company.owner_age || 0);
+  const ageScore = age >= 68 ? 1 : age >= 64 ? 0.85 : age >= 60 ? 0.65 : age >= 56 ? 0.45 : age ? 0.3 : 0.4;
+  const ready = AVAIL_READINESS[(company.availability || '').toLowerCase()] ?? 0.5;
+  const factor = 0.6 * ageScore + 0.4 * ready;
+  const score = round(factor * 25);
+  const bits = [];
+  if (age) bits.push(`owner ${age}`);
+  if (company.availability) bits.push(company.availability);
+  return { key: 'succession', label: 'Succession window', score, max: 25,
+    note: bits.join(' · ') || 'No owner data' };
+}
+
+function consolidation(company) {
   const heat = clamp(company.sector_heat ?? 50, 0, 100);
-  const score = round((heat / 100) * 25);
-  return { key: 'strategicFit', label: 'Strategic fit / sector heat', score, max: 25,
+  return { key: 'consolidation', label: 'Consolidation heat', score: round((heat / 100) * 20), max: 20,
     note: `Sector heat ${heat}/100` };
 }
 
-function growth(company) {
-  const g = Number(company.growth_rate ?? 0);
-  // 60%+ YoY maxes the component.
-  const score = round(clamp(g / 60, 0, 1) * 25);
-  return { key: 'growth', label: 'Growth trajectory', score, max: 25,
-    note: g ? `${g}% YoY` : 'No growth data' };
-}
-
 function sizeFit(company) {
-  const revenue = Number(company.revenue_eur ?? company.arr_eur ?? 0);
-  const m = revenue / 1_000_000;
-  // Mid-market M&A sweet spot ~ €20M–150M revenue. Triangular curve, with a
-  // gentle penalty (not zero) outside the band.
+  const m = Number(company.revenue_eur ?? 0) / 1_000_000;
+  // Searcher sweet spot ~ €3M–20M revenue. Ramp in, plateau, taper for larger.
   let factor;
   if (m <= 0) factor = 0;
-  else if (m < 20) factor = 0.4 + 0.6 * (m / 20);          // ramp up to the band
-  else if (m <= 150) factor = 1;                            // in the sweet spot
-  else factor = clamp(1 - (m - 150) / 600, 0.35, 1);       // taper for large caps
-  const score = round(factor * 20);
-  return { key: 'sizeFit', label: 'Size fit (mid-market)', score, max: 20,
-    note: m ? `~€${m.toFixed(0)}M revenue` : 'No revenue data' };
+  else if (m < 3) factor = 0.45 + 0.55 * (m / 3);
+  else if (m <= 20) factor = 1;
+  else factor = clamp(1 - (m - 20) / 60, 0.3, 1);
+  return { key: 'sizeFit', label: 'Size fit (lower-mid)', score: round(factor * 20), max: 20,
+    note: m ? `~€${m.toFixed(1)}M revenue` : 'No revenue data' };
 }
 
-function ownership(company) {
-  const own = (company.ownership || 'private').toLowerCase();
-  const score = OWNERSHIP_SCORE[own] ?? 9;
-  return { key: 'ownership', label: 'Transactability', score, max: 15,
-    note: own.replace('-', ' ') };
+function quality(company) {
+  const rev = Number(company.revenue_eur ?? 0);
+  const ebitda = Number(company.ebitda_eur ?? 0);
+  if (!rev || !ebitda) return { key: 'quality', label: 'Cash quality (EBITDA margin)', score: 7, max: 15, note: 'No margin data' };
+  const margin = ebitda / rev; // 0..1
+  const factor = clamp((margin - 0.08) / (0.20 - 0.08), 0, 1); // 8%→20% maps 0→1
+  return { key: 'quality', label: 'Cash quality (EBITDA margin)', score: round(factor * 15), max: 15,
+    note: `${Math.round(margin * 100)}% margin` };
 }
 
 function momentum(signals) {
   const now = Date.now();
   const recent = (signals || []).filter((s) => {
     const d = new Date(s.signal_date || s.created_at || now).getTime();
-    return now - d <= 30 * 24 * 60 * 60 * 1000; // last 30 days
+    return now - d <= 45 * 24 * 60 * 60 * 1000;
   });
   const raw = recent.reduce((sum, s) => sum + (SEVERITY_WEIGHT[s.severity] || 1), 0);
-  const score = round(clamp(raw / 12, 0, 1) * 15); // ~2 high-severity signals maxes it
-  const note = recent.length
-    ? `${recent.length} signal${recent.length === 1 ? '' : 's'} in 30d`
-    : 'Quiet';
-  return { key: 'momentum', label: 'Signal momentum', score, max: 15, note };
+  const score = round(clamp(raw / 10, 0, 1) * 20);
+  return { key: 'momentum', label: 'Signal momentum', score, max: 20,
+    note: recent.length ? `${recent.length} sourced signal${recent.length === 1 ? '' : 's'} · 45d` : 'Quiet' };
 }
 
 function bandFor(total) {
@@ -89,20 +89,17 @@ function bandFor(total) {
 
 function scoreCompany(company, { signals = [] } = {}) {
   const components = [
-    strategicFit(company),
-    growth(company),
+    succession(company),
+    consolidation(company),
     sizeFit(company),
-    ownership(company),
+    quality(company),
     momentum(signals),
   ];
   const total = clamp(components.reduce((s, c) => s + c.score, 0), 0, 100);
-
-  // Drivers = components contributing the most relative to their max.
   const drivers = [...components]
     .sort((a, b) => b.score / b.max - a.score / a.max)
     .slice(0, 2)
     .map((c) => c.label);
-
   return { total, band: bandFor(total), components, drivers };
 }
 

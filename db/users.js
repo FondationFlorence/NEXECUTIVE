@@ -8,6 +8,10 @@ const EMAIL_DAY7 = 2;   // 0010
 const EMAIL_DAY13 = 4;  // 0100
 const EMAIL_DAY15 = 8;  // 1000
 
+// Behavioral nurture (replaces the fixed-day cadence): one branch per user.
+const BEHAVIORAL_ACTIVATED = 1; // user did the aha -> upgrade case
+const BEHAVIORAL_DORMANT = 2;   // user didn't -> tailored example brief
+
 /** Return trial users who need email N (bit not set in email_sequence_sent).
  *  Trial users are created with subscription_status = 'trial'; only paid
  *  ('active') users are excluded from the nurture sequence. */
@@ -58,10 +62,45 @@ async function isSubscribed(userId) {
 /** Fetch a user by id. */
 async function getUserById(id) {
   const r = await pool.query(
-    `SELECT id, email, name, trial_start_date, subscription_status FROM users WHERE id = $1`,
+    `SELECT id, email, name, trial_start_date, subscription_status, activated_at FROM users WHERE id = $1`,
     [id],
   );
   return r.rows[0];
 }
 
-module.exports = { getUsersNeedingEmail, markEmailSent, createTrialUser, isSubscribed, getUserById, EMAIL_DAY1, EMAIL_DAY7, EMAIL_DAY13, EMAIL_DAY15 };
+/** Mark a user as activated (idempotent — keeps the first activation time). */
+async function markActivated(userId) {
+  await pool.query(
+    `UPDATE users SET activated_at = COALESCE(activated_at, NOW()) WHERE id = $1`,
+    [userId],
+  );
+}
+
+/** Trial users (not yet paid) eligible for a behavioral nurture nudge:
+ *  at least 2 days into the trial, still within the window, none sent yet. */
+async function getBehavioralCandidates() {
+  const r = await pool.query(
+    `SELECT id, email, name, trial_start_date, activated_at, behavioral_email_sent
+       FROM users
+      WHERE trial_start_date IS NOT NULL
+        AND subscription_status IS DISTINCT FROM 'active'
+        AND behavioral_email_sent = 0
+        AND trial_start_date <= NOW() - interval '2 days'
+        AND trial_start_date >= NOW() - interval '14 days'`,
+  );
+  return r.rows;
+}
+
+async function markBehavioralSent(userId, bit) {
+  await pool.query(
+    `UPDATE users SET behavioral_email_sent = behavioral_email_sent | $2 WHERE id = $1`,
+    [userId, bit],
+  );
+}
+
+module.exports = {
+  getUsersNeedingEmail, markEmailSent, createTrialUser, isSubscribed, getUserById,
+  markActivated, getBehavioralCandidates, markBehavioralSent,
+  EMAIL_DAY1, EMAIL_DAY7, EMAIL_DAY13, EMAIL_DAY15,
+  BEHAVIORAL_ACTIVATED, BEHAVIORAL_DORMANT,
+};

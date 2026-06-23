@@ -1,122 +1,173 @@
 /**
- * Seed the monitored target universe + an initial set of M&A signals.
+ * Seed the monitored target universe + sourced M&A signals.
  *
- * This is demo/reference data representing the slice of the market the
- * platform actively monitors. It is idempotent: companies key on `slug`
- * and alerts are only inserted the first time a company is created, so the
- * migration is safe to re-run and never duplicates signals.
+ * Positioning: lower-mid-market acquisition targets across core European
+ * markets (FR / UK / DE / AT / NL / IE) for individual acquirers (searchers,
+ * ETA, independent sponsors). Every company is tied to its official registry,
+ * and every signal carries a primary-source URL — the verifiability promise.
+ *
+ * Idempotent: companies key on `slug`; alerts are only inserted the first time
+ * a company is created, so re-running never duplicates signals.
+ *
+ * NOTE: this is reference/demo data — entities are illustrative. The registry
+ * and source URLs use the real official domains to model the verifiability
+ * chain; live fetchers (Companies House, BODACC, Infogreffe, CFNEWS) plug into
+ * jobs/signal-monitor.js.
  */
-const COMPANIES = [
-  // slug, name, sector, country, hq_city, employees, revenue(M€), arr(M€), stage, valuation(M€), ownership, founded, growth%, heat, description, website
-  ['helios-software',   'Helios Software',      'SaaS',           'Germany',     'Berlin',     420,  62,  48,  'Series C',     520,  'pe-backed',    2015, 41, 88, 'Vertical SaaS for mid-market manufacturers. €48M ARR, Series C, strong net retention.', 'helios.example'],
-  ['apex-legal',        'Apex Legal',           'Legal Tech',     'Germany',     'Munich',     180,  24,  19,  'Series B',     140,  'private',      2017, 33, 71, 'Contract lifecycle management used by 600+ European law firms.', 'apexlegal.example'],
-  ['nordveld',          'Nordveld Analytics',   'Fintech',        'Sweden',      'Stockholm',  310,  55,  44,  'Series C',     410,  'pe-backed',    2014, 38, 82, 'Risk analytics for Nordic retail banks. Regulatory-grade data pipelines.', 'nordveld.example'],
-  ['lumen-health',      'Lumen Health',         'Healthtech',     'Netherlands', 'Amsterdam',  260,  41,  31,  'Series B',     290,  'private',      2016, 47, 79, 'Remote patient monitoring platform live across 4 EU health systems.', 'lumenhealth.example'],
-  ['castellum-pay',     'Castellum Pay',        'Fintech',        'Spain',       'Madrid',     540,  88,  70,  'Series D',     760,  'pe-backed',    2013, 29, 84, 'Embedded payments for Iberian SMBs. Licensed EMI.', 'castellumpay.example'],
-  ['orbithree',         'Orbithree',            'Cybersecurity',  'Ireland',     'Dublin',     150,  19,  16,  'Series B',     180,  'vc-backed',    2018, 62, 90, 'Cloud posture management. ARR tripled in 18 months.', 'orbithree.example'],
-  ['greenmark',         'Greenmark Energy',     'Cleantech',      'Denmark',     'Copenhagen', 380,  72,  null,'Series C',     480,  'private',      2012, 26, 76, 'Grid-scale battery optimisation software for utilities.', 'greenmark.example'],
-  ['veridian-bio',      'Veridian Bio',         'Healthtech',     'France',      'Paris',      210,  33,  null,'Series B',     240,  'vc-backed',    2017, 51, 73, 'Clinical trial data automation. Two pharma anchor clients.', 'veridianbio.example'],
-  ['atlas-freight',     'Atlas Freight',        'Logistics',      'Netherlands', 'Rotterdam',  620,  130, null,'PE-owned',     540,  'pe-backed',    2009, 14, 58, 'Digital freight forwarding across Benelux and DACH.', 'atlasfreight.example'],
-  ['monsieur-table',    'Monsieur Table',       'Foodtech',       'France',      'Lyon',       290,  47,  null,'Series C',     220,  'private',      2015, 22, 49, 'Restaurant SaaS + payments. 9,000 venues.', 'monsieurtable.example'],
-  ['polaris-mobility',  'Polaris Mobility',     'Mobility',       'Finland',     'Helsinki',   175,  21,  17,  'Series B',     160,  'vc-backed',    2018, 55, 68, 'Fleet electrification analytics for logistics operators.', 'polaris.example'],
-  ['terra-proptech',    'Terra Proptech',       'Proptech',       'Poland',      'Warsaw',     230,  28,  21,  'Series B',     150,  'private',      2016, 36, 61, 'Commercial real-estate underwriting automation for CEE markets.', 'terraproptech.example'],
-  ['sentinel-ai',       'Sentinel AI',          'AI/ML',          'Germany',     'Berlin',     140,  16,  14,  'Series A',     190,  'vc-backed',    2020, 88, 94, 'Document intelligence for regulated industries. Hyper-growth.', 'sentinelai.example'],
-  ['banca-nuvola',      'Banca Nuvola',         'Fintech',        'Italy',       'Milan',      460,  77,  61,  'Series C',     520,  'pe-backed',    2014, 31, 80, 'Cloud core-banking for cooperative banks.', 'bancanuvola.example'],
-  ['quanta-insure',     'Quanta Insure',        'Insurtech',      'Belgium',     'Brussels',   200,  35,  27,  'Series B',     210,  'private',      2017, 44, 70, 'Parametric insurance underwriting platform.', 'quantainsure.example'],
-  ['fjord-logistics',   'Fjord Logistics',      'Logistics',      'Norway',      'Oslo',       410,  92,  null,'PE-owned',     380,  'pe-backed',    2010, 11, 52, 'Cold-chain logistics tech for seafood exporters.', 'fjordlog.example'],
-  ['adriatic-cloud',    'Adriatic Cloud',       'SaaS',           'Romania',     'Bucharest',  330,  44,  35,  'Series B',     260,  'vc-backed',    2016, 49, 75, 'DevOps automation platform with strong CEE footprint.', 'adriatic.example'],
-  ['lusitania-med',     'Lusitania Med',        'Healthtech',     'Portugal',    'Lisbon',     160,  22,  null,'Series A',     120,  'vc-backed',    2019, 58, 66, 'AI triage software deployed in Iberian hospitals.', 'lusitaniamed.example'],
-  ['wienfeld',          'Wienfeld Systems',     'Industrial',     'Austria',     'Vienna',     720,  185, null,'Family-owned', 640,  'family-owned', 2003, 8,  44, 'Industrial automation components. Succession in play.', 'wienfeld.example'],
-  ['saga-commerce',     'Saga Commerce',        'E-commerce',     'Sweden',      'Gothenburg', 290,  58,  null,'Series C',     300,  'private',      2014, 24, 57, 'Headless commerce platform for Nordic D2C brands.', 'sagacommerce.example'],
-  ['delta-secure',      'Delta Secure',         'Cybersecurity',  'France',      'Paris',      260,  40,  33,  'Series C',     350,  'pe-backed',    2015, 39, 86, 'Managed detection & response for the mid-market.', 'deltasecure.example'],
-  ['brightlane',        'Brightlane',           'Legal Tech',     'Ireland',     'Dublin',     120,  15,  12,  'Series A',     95,   'vc-backed',    2019, 67, 69, 'AI due-diligence review for M&A counsel.', 'brightlane.example'],
-  ['hanse-logistik',    'Hanse Logistik',       'Logistics',      'Germany',     'Hamburg',    540,  140, null,'PE-owned',     500,  'pe-backed',    2008, 12, 55, 'Port automation and customs tech for North Sea trade.', 'hanselogistik.example'],
-  ['iberdata',          'Iberdata',             'AI/ML',          'Spain',       'Barcelona',  185,  23,  19,  'Series B',     200,  'vc-backed',    2018, 59, 83, 'Demand-forecasting AI for grocery retailers.', 'iberdata.example'],
-  ['nimbus-cloud',      'Nimbus Cloud',         'SaaS',           'Denmark',     'Aarhus',     240,  37,  30,  'Series B',     250,  'private',      2016, 43, 74, 'FinOps cloud-cost platform with 200+ enterprise clients.', 'nimbuscloud.example'],
-  ['valoria-pay',       'Valoria Pay',          'Fintech',        'Poland',      'Krakow',     370,  52,  42,  'Series C',     330,  'pe-backed',    2015, 34, 78, 'A2A payments rails across CEE.', 'valoriapay.example'],
-  ['estuary-bio',       'Estuary Bio',          'Healthtech',     'Belgium',     'Ghent',      130,  18,  null,'Series A',     140,  'vc-backed',    2020, 71, 72, 'Genomics data platform for oncology research.', 'estuarybio.example'],
-  ['kvarn-energy',      'Kvarn Energy',         'Cleantech',      'Finland',     'Tampere',    280,  49,  null,'Series C',     310,  'private',      2013, 28, 77, 'Industrial heat-recovery optimisation software.', 'kvarn.example'],
-  ['romulus-soft',      'Romulus Software',     'SaaS',           'Italy',       'Rome',       310,  46,  37,  'Series B',     270,  'vc-backed',    2016, 40, 70, 'ERP for Southern-European SMB manufacturers.', 'romulussoft.example'],
-  ['batavia-sec',       'Batavia Security',     'Cybersecurity',  'Netherlands', 'Utrecht',    175,  26,  22,  'Series B',     230,  'private',      2017, 53, 87, 'OT/IoT security for critical infrastructure.', 'bataviasec.example'],
+const M = 1_000_000;
+
+// Per-country official registry + base URL for a company record.
+const REGISTRY = {
+  UK:      { name: 'Companies House', base: 'https://find-and-update.company-information.service.gov.uk/company/' },
+  France:  { name: 'Infogreffe / Pappers', base: 'https://www.pappers.fr/entreprise/' },
+  Germany: { name: 'Handelsregister', base: 'https://www.handelsregister.de/rp_web/' },
+  Austria: { name: 'Firmenbuch', base: 'https://firmenbuch.at/' },
+  Netherlands: { name: 'KVK', base: 'https://www.kvk.nl/zoeken/?q=' },
+  Ireland: { name: 'CRO', base: 'https://core.cro.ie/' },
+};
+
+const CFNEWS = 'https://www.cfnews.net/';
+const BODACC = 'https://www.bodacc.fr/';
+
+// slug, name, sector, country, city, employees, revenue(M€), ebitda(M€), ownership,
+// founded, growth%, sector_heat, owner_age, availability, registryRef (suffix on base), description
+const C = [
+  // ---- France --------------------------------------------------------------
+  ['froid-atlantique', 'Froid Atlantique', 'HVAC & Refrigeration', 'France', 'Nantes', 64, 9.2, 1.4, 'owner-managed', 1996, 7, 84, 63, 'off-market', '498201634', 'Commercial refrigeration install & maintenance for food retail across western France. Recurring service contracts.'],
+  ['clermont-usinage', 'Clermont Usinage', 'Specialty Manufacturing', 'France', 'Clermont-Ferrand', 48, 7.1, 1.1, 'family-owned', 1984, 4, 58, 67, 'exploring', '402558190', 'Precision machining for aerospace & industrial OEMs. Founder approaching retirement, no successor.'],
+  ['proprenet-services', 'Propre-Net Services', 'Commercial Cleaning', 'France', 'Lyon', 210, 12.4, 1.6, 'owner-managed', 2001, 9, 71, 59, 'off-market', '441027885', 'B2B facility cleaning across Auvergne-Rhône-Alpes. Diversified contract base, low churn.'],
+  ['hydrowest', 'HydroWest', 'Water Treatment', 'France', 'Bordeaux', 38, 5.8, 1.0, 'founder-led', 2009, 14, 76, 55, 'exploring', '512339027', 'Industrial water-treatment systems & service for wineries and food processors.'],
+  ['logi-garonne', 'Logi-Garonne', 'Logistics & Transport', 'France', 'Toulouse', 95, 16.3, 1.3, 'family-owned', 1979, 3, 49, 69, 'rumoured', '317884520', 'Regional palletised freight & warehousing. Second-generation owners seeking exit.'],
+
+  // ---- United Kingdom ------------------------------------------------------
+  ['penmoor-elevators', 'Penmoor Elevators', 'Elevator Maintenance', 'UK', 'Birmingham', 72, 8.9, 1.7, 'owner-managed', 1992, 6, 88, 64, 'off-market', '02884771', 'Lift service & modernisation, ~1,400 units under contract. Sticky recurring revenue.'],
+  ['aldgate-testing', 'Aldgate Testing & Inspection', 'Test & Inspection', 'UK', 'Manchester', 54, 6.7, 1.2, 'founder-led', 2005, 12, 79, 58, 'exploring', '05417762', 'Non-destructive testing for construction & energy. Accredited, asset-light.'],
+  ['northfield-msp', 'Northfield IT', 'IT Managed Services', 'UK', 'Leeds', 41, 5.2, 1.1, 'owner-managed', 2010, 17, 86, 56, 'off-market', '07331902', 'MSP for SME professional-services firms. 90%+ recurring, strong NRR.'],
+  ['brackley-vet', 'Brackley Veterinary Group', 'Veterinary Services', 'UK', 'Oxford', 88, 7.4, 1.5, 'family-owned', 1988, 8, 90, 66, 'rumoured', '02110784', 'Five-site small-animal vet group. Consolidator interest rising in the segment.'],
+  ['severn-packaging', 'Severn Packaging', 'Packaging', 'UK', 'Bristol', 130, 18.6, 2.2, 'family-owned', 1975, 4, 55, 71, 'exploring', '01209934', 'Corrugated packaging manufacturer. Succession driven, owner 71.'],
+
+  // ---- Germany -------------------------------------------------------------
+  ['rheinluft-klima', 'Rheinluft Klimatechnik', 'HVAC & Refrigeration', 'Germany', 'Cologne', 78, 11.8, 1.9, 'family-owned', 1981, 5, 83, 68, 'exploring', 'HRB-rheinluft', 'Commercial HVAC install & service for Mittelstand industry. Classic Nachfolge case.'],
+  ['saarmetall-werk', 'Saarmetall Werk', 'Specialty Manufacturing', 'Germany', 'Saarbrücken', 165, 27.5, 3.1, 'family-owned', 1968, 2, 52, 70, 'rumoured', 'HRB-saarmetall', 'Metal components for automotive tier-2. Succession + transformation pressure.'],
+  ['bavaria-labortech', 'Bavaria Labortechnik', 'Healthcare Services', 'Germany', 'Munich', 60, 9.6, 1.8, 'founder-led', 2003, 15, 80, 57, 'off-market', 'HRB-bavlab', 'Lab logistics & diagnostics support for clinics. Recurring, regulated.'],
+  ['nordsee-umwelt', 'Nordsee Umweltservice', 'Environmental Services', 'Germany', 'Hamburg', 112, 15.2, 2.0, 'owner-managed', 1994, 7, 74, 62, 'exploring', 'HRB-nordsee', 'Industrial waste & remediation services for the port economy.'],
+  ['elbe-aufzug', 'Elbe Aufzug', 'Elevator Maintenance', 'Germany', 'Dresden', 49, 6.3, 1.2, 'family-owned', 1990, 6, 87, 69, 'off-market', 'HRB-elbeauf', 'Lift maintenance across Saxony. ~700 units, succession driven.'],
+
+  // ---- Austria -------------------------------------------------------------
+  ['alpin-gebaeude', 'Alpin Gebäudetechnik', 'HVAC & Facilities', 'Austria', 'Innsbruck', 56, 8.1, 1.3, 'family-owned', 1987, 6, 81, 67, 'exploring', 'FN-alpin', 'Building-services contractor for hospitality & commercial. Owner seeking succession.'],
+  ['wiener-prueftechnik', 'Wiener Prüftechnik', 'Test & Inspection', 'Austria', 'Vienna', 44, 5.6, 1.0, 'founder-led', 2007, 11, 78, 55, 'off-market', 'FN-wienpruef', 'Inspection & certification for lifts and pressure equipment. Accredited.'],
+  ['steirer-logistik', 'Steirer Logistik', 'Logistics & Transport', 'Austria', 'Graz', 83, 13.4, 1.2, 'family-owned', 1983, 3, 47, 70, 'rumoured', 'FN-steirer', 'Regional distribution & contract logistics. Second generation, no successor.'],
+
+  // ---- Netherlands / Ireland ----------------------------------------------
+  ['delft-aandrijf', 'Delft Aandrijftechniek', 'B2B Distribution', 'Netherlands', 'Delft', 39, 7.9, 1.1, 'owner-managed', 1998, 8, 60, 61, 'exploring', 'delft-aandrijf', 'Distributor of drive & automation components. Loyal industrial customer base.'],
+  ['shannon-coldchain', 'Shannon Cold Chain', 'Logistics & Transport', 'Ireland', 'Limerick', 67, 10.7, 1.5, 'founder-led', 2002, 13, 72, 58, 'off-market', 'shannon-coldchain', 'Temperature-controlled logistics for food & pharma. Strong growth.'],
 ];
 
-// company slug -> alerts [type, severity, title, detail, source, regulator, daysAgo]
-const ALERTS = {
-  'helios-software': [
-    ['acquisition', 'high',   'Acquisition signals detected', 'Two strategic acquirers flagged in sector; founder-CEO signalled openness to exit on a recent panel.', 'Sector chatter', null, 2],
-    ['funding',     'medium', 'Bridge round closed ahead of Series D', 'Insiders extended a €15M bridge — typically a pre-exit liquidity move.', 'Filing', null, 9],
+// slug -> [type, severity, title, detail, sourceName, sourceUrl, daysAgo]
+const A = {
+  'froid-atlantique': [
+    ['succession', 'high', 'Owner 63, no named successor', 'Director records show a sole owner-manager aged 63 with no transfer of shares filed — a textbook succession window.', 'Infogreffe / Pappers', 'https://www.pappers.fr/entreprise/froid-atlantique-498201634', 2],
+    ['filing', 'medium', '2025 accounts filed — EBITDA margin 15%', 'Latest statutory accounts published; service revenue stable, margins intact.', 'Infogreffe / Pappers', 'https://www.pappers.fr/entreprise/froid-atlantique-498201634#comptes', 12],
   ],
-  'apex-legal': [
-    ['regulatory',  'high',   'Regulatory filing in Germany — BaFin flag', 'New regulatory filing detected; due-diligence window opening on data-handling practices.', 'BaFin register', 'BaFin', 1],
+  'clermont-usinage': [
+    ['availability', 'high', 'Advisor mandate signalled', 'A regional M&A boutique referenced an aerospace-machining mandate matching this profile.', 'CFNEWS', CFNEWS + 'l-actualite/transactions/cessions-pme-aero-auvergne', 4],
+    ['succession', 'medium', 'Founder 67, family-owned', 'Long-held family ownership with founder past 65 — exploring exit.', 'Infogreffe / Pappers', 'https://www.pappers.fr/entreprise/clermont-usinage-402558190', 9],
   ],
-  'nordveld': [
-    ['leadership',  'medium', 'CFO departure', 'CFO stepped down after 6 years; succession often precedes a transaction.', 'Press', null, 5],
-    ['market',      'medium', 'Nordic risk-analytics consolidation', '3 deals in the segment over 90 days — multiples expanding.', 'Market scan', null, 12],
+  'proprenet-services': [
+    ['market', 'medium', 'Cleaning roll-up active in France', 'Two PE-backed platforms are consolidating regional B2B cleaning — multiples firming.', 'CFNEWS', CFNEWS + 'l-actualite/build-up/proprete-b2b-consolidation', 6],
   ],
-  'castellum-pay': [
-    ['regulatory',  'medium', 'EMI licence scope extended', 'Bank of Spain authorised expanded e-money scope — raises strategic value.', 'Regulator', 'ECB', 7],
+  'hydrowest': [
+    ['deal', 'medium', 'Comparable water-treatment deal closed', 'A comparable industrial water-treatment SME changed hands this quarter (sourced).', 'CFNEWS', CFNEWS + 'l-actualite/transactions/traitement-eau-industriel', 8],
   ],
-  'orbithree': [
-    ['funding',     'high',   'ARR tripled — inbound interest rising', 'Hyper-growth cyber asset; multiple PE funds tracking.', 'Market scan', null, 3],
-    ['litigation',  'low',    'Minor IP dispute resolved', 'Patent dispute settled out of court — removes a diligence blocker.', 'Court record', null, 20],
+  'logi-garonne': [
+    ['ownership', 'high', 'BODACC: share-transfer notice', 'Official legal gazette published a partial share-transfer notice — ownership in motion.', 'BODACC', BODACC + 'annonce/2026-A-12840', 3],
   ],
-  'sentinel-ai': [
-    ['market',      'high',   'AI document-intelligence heat spike', 'Sector heat at 94 — comparable assets acquired at premium multiples this quarter.', 'Market scan', null, 1],
-    ['funding',     'medium', 'Series A oversubscribed', 'Round 2.4x oversubscribed; signals scarcity and acquirer urgency.', 'Filing', null, 6],
+  'penmoor-elevators': [
+    ['succession', 'high', 'Owner 64, sole shareholder', 'Companies House confirms a single PSC aged 64 — recurring-revenue asset, prime for a managed exit.', 'Companies House', 'https://find-and-update.company-information.service.gov.uk/company/02884771/persons-with-significant-control', 1],
+    ['filing', 'low', 'Confirmation statement filed', 'Annual confirmation statement up to date; ~1,400 units under contract noted in accounts.', 'Companies House', 'https://find-and-update.company-information.service.gov.uk/company/02884771/filing-history', 16],
   ],
-  'banca-nuvola': [
-    ['regulatory',  'medium', 'ECB cloud-banking guidance update', 'New supervisory expectations raise the bar for incumbents — favours modern cores.', 'Regulator', 'ECB', 8],
+  'aldgate-testing': [
+    ['market', 'medium', 'TIC consolidation heat', 'Testing-inspection-certification roll-ups are pricing accredited assets at a premium.', 'CFNEWS', CFNEWS + 'l-actualite/build-up/tic-consolidation-europe', 7],
   ],
-  'delta-secure': [
-    ['acquisition', 'medium', 'Competitor acquired in adjacent segment', 'A direct competitor was acquired — likely to trigger sector re-rating.', 'Deal wire', null, 4],
+  'northfield-msp': [
+    ['availability', 'high', 'Off-market MSP, owner exploring', 'Owner-manager aged 56 signalled openness to a sale; 90%+ recurring revenue.', 'Companies House', 'https://find-and-update.company-information.service.gov.uk/company/07331902', 2],
+    ['market', 'medium', 'MSP roll-up multiples expanding', 'SME-focused MSP platforms paying up for sticky recurring bases.', 'CFNEWS', CFNEWS + 'l-actualite/build-up/msp-it-services', 11],
   ],
-  'wienfeld': [
-    ['leadership',  'high',   'Succession event — family ownership in transition', 'Founder retiring; no internal successor named. Classic carve-out / sale setup.', 'Press', null, 2],
+  'brackley-vet': [
+    ['deal', 'high', 'Vet-group consolidator active nearby', 'A consolidator closed an adjacent multi-site vet acquisition — segment in play.', 'CFNEWS', CFNEWS + 'l-actualite/transactions/veterinaire-build-up', 3],
   ],
-  'brightlane': [
-    ['funding',     'medium', 'Strategic investor on cap table', 'A larger legal-tech took a minority stake — common pre-acquisition pattern.', 'Filing', null, 11],
+  'severn-packaging': [
+    ['succession', 'high', 'Owner 71 — succession overdue', 'Family ownership with principal aged 71 and no filed succession plan.', 'Companies House', 'https://find-and-update.company-information.service.gov.uk/company/01209934/persons-with-significant-control', 5],
   ],
-  'iberdata': [
-    ['market',      'medium', 'Retail-AI multiples expanding', 'Two comparable transactions closed above 8x ARR.', 'Market scan', null, 9],
+  'rheinluft-klima': [
+    ['succession', 'high', 'Nachfolge: owner 68, family-held', 'Handelsregister shows long-standing family ownership; principal aged 68.', 'Handelsregister', 'https://www.handelsregister.de/rp_web/', 4],
   ],
-  'batavia-sec': [
-    ['regulatory',  'high',   'NIS2 enforcement raises strategic value', 'EU NIS2 enforcement is pulling OT-security demand forward — acquirers moving early.', 'Regulator', null, 3],
+  'saarmetall-werk': [
+    ['ownership', 'medium', 'Registered charge added', 'A new charge/security entry suggests refinancing or transaction prep.', 'Handelsregister', 'https://www.handelsregister.de/rp_web/', 6],
+    ['deal', 'medium', 'Tier-2 automotive carve-outs accelerating', 'Succession + EV transition is pushing Mittelstand suppliers to sell.', 'CFNEWS', CFNEWS + 'l-actualite/transactions/mittelstand-automotive', 13],
   ],
-  'lumen-health': [
-    ['regulatory',  'medium', 'GDPR data-processing audit passed', 'Clean audit removes a major diligence risk for health-data acquirers.', 'Audit', 'GDPR', 14],
+  'bavaria-labortech': [
+    ['market', 'medium', 'Lab-services consolidation', 'Diagnostics-support roll-ups expanding across DACH.', 'CFNEWS', CFNEWS + 'l-actualite/build-up/lab-services-dach', 9],
   ],
-  'valoria-pay': [
-    ['market',      'medium', 'CEE payments consolidation underway', 'Two A2A players merged last month; Valoria a likely next target.', 'Market scan', null, 6],
+  'nordsee-umwelt': [
+    ['filing', 'medium', 'Annual accounts published', 'Bundesanzeiger filing confirms stable EBITDA on remediation contracts.', 'Handelsregister', 'https://www.handelsregister.de/rp_web/', 14],
+  ],
+  'elbe-aufzug': [
+    ['succession', 'high', 'Owner 69, ~700 units under contract', 'Recurring lift-maintenance base with an owner past retirement age.', 'Handelsregister', 'https://www.handelsregister.de/rp_web/', 2],
+  ],
+  'alpin-gebaeude': [
+    ['succession', 'medium', 'Firmenbuch: owner 67, family-held', 'Austrian commercial register shows succession-stage family ownership.', 'Firmenbuch', 'https://firmenbuch.at/', 5],
+  ],
+  'wiener-prueftechnik': [
+    ['market', 'medium', 'Inspection assets bid up', 'Accredited inspection businesses are scarce and competitively bid.', 'CFNEWS', CFNEWS + 'l-actualite/build-up/inspection-certification', 8],
+  ],
+  'steirer-logistik': [
+    ['ownership', 'high', 'Firmenbuch: shareholding change filed', 'A shareholding change entry indicates ownership transition underway.', 'Firmenbuch', 'https://firmenbuch.at/', 3],
+  ],
+  'delft-aandrijf': [
+    ['availability', 'medium', 'KVK: owner exploring exit', 'Owner-managed distributor; principal aged 61 exploring a transfer.', 'KVK', 'https://www.kvk.nl/', 7],
+  ],
+  'shannon-coldchain': [
+    ['deal', 'medium', 'Cold-chain logistics in demand', 'Pharma/food cold-chain assets attracting strategic and PE interest.', 'CFNEWS', CFNEWS + 'l-actualite/transactions/cold-chain-logistics', 6],
   ],
 };
 
+function registryUrlFor(country, ref) {
+  const reg = REGISTRY[country];
+  if (!reg) return { registry: null, url: null };
+  // For DE/AT refs we keep the official base (deep links aren't stable there).
+  const url = /^https?:/.test(ref) ? ref : reg.base + ref;
+  return { registry: reg.name, url };
+}
+
 async function insertCompany(client, row) {
-  const [slug, name, sector, country, hq_city, employees, revM, arrM, stage, valM, ownership, founded, growth, heat, description, website] = row;
+  const [slug, name, sector, country, city, emp, revM, ebitdaM, own, founded, growth, heat, ownerAge, avail, ref, desc] = row;
+  const { registry, url } = registryUrlFor(country, ref);
+  const valuation = ebitdaM ? Math.round(ebitdaM * 6 * M) : null; // ~6x EBITDA indicative
   const r = await client.query(
     `INSERT INTO companies
-       (slug, name, sector, country, hq_city, employees, revenue_eur, arr_eur,
-        funding_stage, valuation_eur, ownership, founded_year, growth_rate, sector_heat, description, website)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+       (slug, name, sector, country, hq_city, employees, revenue_eur, ebitda_eur,
+        ownership, founded_year, growth_rate, sector_heat, owner_age, availability,
+        valuation_eur, registry, registry_url, description)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
      ON CONFLICT (slug) DO NOTHING
      RETURNING id`,
     [
-      slug, name, sector, country, hq_city, employees,
-      revM != null ? revM * 1_000_000 : null,
-      arrM != null ? arrM * 1_000_000 : null,
-      stage,
-      valM != null ? valM * 1_000_000 : null,
-      ownership, founded, growth, heat, description, website,
+      slug, name, sector, country, city, emp,
+      Math.round(revM * M), Math.round(ebitdaM * M),
+      own, founded, growth, heat, ownerAge, avail,
+      valuation, registry, url, desc,
     ],
   );
-  return r.rows[0]?.id || null; // null when the company already existed
+  return r.rows[0]?.id || null;
 }
 
 async function insertAlerts(client, companyId, alerts) {
-  for (const [type, severity, title, detail, source, regulator, daysAgo] of alerts) {
+  for (const [type, severity, title, detail, source, sourceUrl, daysAgo] of alerts) {
     await client.query(
-      `INSERT INTO alerts (company_id, type, severity, title, detail, source, regulator, signal_date)
+      `INSERT INTO alerts (company_id, type, severity, title, detail, source, source_url, signal_date)
        VALUES ($1,$2,$3,$4,$5,$6,$7, NOW() - ($8 || ' days')::interval)`,
-      [companyId, type, severity, title, detail, source, regulator, String(daysAgo)],
+      [companyId, type, severity, title, detail, source, sourceUrl, String(daysAgo)],
     );
   }
 }
@@ -124,13 +175,9 @@ async function insertAlerts(client, companyId, alerts) {
 module.exports = {
   name: 'seed_companies',
   up: async (client) => {
-    for (const row of COMPANIES) {
+    for (const row of C) {
       const id = await insertCompany(client, row);
-      // Only seed alerts when the company was freshly inserted, so re-runs
-      // never duplicate signals.
-      if (id && ALERTS[row[0]]) {
-        await insertAlerts(client, id, ALERTS[row[0]]);
-      }
+      if (id && A[row[0]]) await insertAlerts(client, id, A[row[0]]);
     }
   },
 };

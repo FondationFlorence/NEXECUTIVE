@@ -1,12 +1,16 @@
 # Nexecutive
 
-Autonomous **M&A deal-intelligence platform** for European mid-market deal teams —
-M&A lawyers, corporate development, and business development. It monitors a target
-universe, scores acquisition fit, surfaces signals, generates executive deal briefs,
-and tracks a live pipeline.
+**Sourced acquisition intelligence for searchers & independent buyers** — the
+self-funded searcher, search fund, ETA buyer, or independent sponsor acquiring a single
+lower-mid-market European business. Give us your thesis; get a ranked shortlist of
+off-market, owner-operated targets with real succession signals — **every signal traced
+to its primary source** (Companies House, BODACC, Infogreffe, Firmenbuch, KVK, CRO,
+CFNEWS). Verifiability is the product.
 
-The repo contains both the **marketing funnel** (landing page, trial signup, nurture
-emails, pricing) and the **product** behind it (the authenticated workspace).
+Markets: France, UK, Germany, Austria, Netherlands, Ireland — deep, not wide.
+
+The repo contains both the **marketing funnel** (landing page, thesis-first signup,
+behavioral nurture, pricing) and the **product** behind it (the authenticated workspace).
 
 ## Stack
 
@@ -38,33 +42,39 @@ npm run migrate     # creates schema + seeds the target universe
 npm run dev         # http://localhost:3000
 ```
 
-Create an account at `/signup` — a new account is seeded with a starter watchlist,
-pipeline, and weekly digest so the workspace is immediately useful.
+Sign up at `/signup`, then set your thesis at `/onboarding` — you get a ranked, sourced
+shortlist immediately (the aha lands before the trial clock matters).
 
 ## Routes
 
-**Public:** `GET /` landing · `GET /login` · `GET /signup` · `GET /health`
+**Public:** `GET /` landing · `GET /login` · `GET /signup` · `GET /health` · `/llms.txt`
 
 **Product (auth required):**
-- `GET /dashboard` — overview: watchlist, live signals, pipeline, stats
-- `GET /targets` — screening engine over the universe, ranked by fit score
-- `GET /company/:slug` — target detail, score breakdown, signals, AI deal brief
-- `GET /alerts` — signal feed · `GET /pipeline` — deal board · `GET /settings`
-- Actions: `POST /app/watchlist/(add|remove)`, `/app/briefs/generate`, `/app/pipeline/(add|move|remove)`, `/app/settings/digest`
+- `GET /onboarding` — thesis intake → instant sourced shortlist
+- `GET /dashboard` — thesis shortlist (fit score + % thesis match), live sourced signals, pipeline
+- `GET /targets` — screening engine; fit score + thesis-match %, registry source links
+- `GET /company/:slug` — target detail, score breakdown, sourced signal trail, AI brief, "Verify on <registry>"
+- `GET /alerts` — sourced signal feed · `GET /pipeline` — deal board · `GET /settings` — thesis + digest
+- Actions: `POST /onboarding`, `/app/watchlist/(add|remove)`, `/app/briefs/generate`, `/app/pipeline/(add|move|remove)`, `/app/settings/(thesis|digest)`
 
 **APIs:** `POST /api/auth/(signup|login|logout)`, `/api/trial-emails/*`, `/webhook/stripe`
 
-## Scoring engine
+## Scoring & matching
 
-`services/scoring.js` produces an explainable 0–100 acquisition-fit score from five
-weighted components: strategic fit (sector heat), growth, size fit (mid-market sweet
-spot), transactability (ownership), and signal momentum. Deterministic — the same
-inputs always produce the same score and breakdown.
+- `services/scoring.js` — explainable 0–100 ripeness score for searchers: succession
+  window (owner age + availability), consolidation heat, size fit (lower-mid sweet spot),
+  cash quality (EBITDA margin), and signal momentum. Deterministic.
+- `services/thesis.js` — matches a company to the buyer's thesis (sectors, geographies,
+  revenue band, keywords) → 0–100 fit %, and ranks the shortlist.
+
+Every signal and brief links to its primary source — registries for ownership/succession,
+CFNEWS for deal activity.
 
 ## Scheduled jobs (`polsia.toml`)
 
-- `jobs/trial-email-scheduler.js` — daily 08:00 UTC, trial nurture emails (days 1/7/13/15)
-- `jobs/signal-monitor.js` — every 6h, emits fresh M&A signals across the universe
+- `jobs/trial-email-scheduler.js` — daily, **behavioral** nurture: activated → upgrade case,
+  dormant → a sourced example brief built from their thesis. `EMAIL_DRY_RUN=true` logs instead of sending.
+- `jobs/signal-monitor.js` — every 6h, emits fresh **sourced** signals across the universe.
 
 Both are gated by `POLSIA_IN_PROCESS_CRONS_ENABLED=true`.
 

@@ -5,7 +5,6 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
 const { pool } = require('../db/index');
-const { seedStarterWatchlist } = require('../services/onboarding');
 
 router.post('/signup', express.json(), async (req, res) => {
   const { name, email, password } = req.body;
@@ -27,14 +26,8 @@ router.post('/signup', express.json(), async (req, res) => {
       [email, name || null, passwordHash],
     );
     req.session.userId = r.rows[0].id;
-
-    // Best-effort: give the new account a live workspace. Never block signup.
-    try {
-      await seedStarterWatchlist(r.rows[0].id);
-    } catch (seedErr) {
-      console.error('[auth] onboarding seed failed (non-fatal):', seedErr.message);
-    }
-
+    // The workspace is seeded from the user's thesis at /onboarding (the aha),
+    // not here — value follows the thesis, not a generic starter list.
     res.status(201).json({ ok: true });
   } catch (err) {
     console.error('[auth] signup error:', err.message);

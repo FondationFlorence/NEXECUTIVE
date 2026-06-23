@@ -84,8 +84,10 @@ async function runCoreMigrations(client) {
   // EXISTS above will not add columns to an already-existing users table).
   await client.query(`
     ALTER TABLE users
-      ADD COLUMN IF NOT EXISTS trial_start_date    TIMESTAMPTZ,
-      ADD COLUMN IF NOT EXISTS email_sequence_sent INTEGER NOT NULL DEFAULT 0
+      ADD COLUMN IF NOT EXISTS trial_start_date      TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS email_sequence_sent   INTEGER NOT NULL DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS activated_at          TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS behavioral_email_sent INTEGER NOT NULL DEFAULT 0
   `);
 
   // Unique constraint on email (required for UPSERT)

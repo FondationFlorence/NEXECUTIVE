@@ -253,3 +253,34 @@
 .form-row select:focus, .form-row input:focus { border-color: var(--gold); }
 .checkbox-row { display: flex; align-items: center; gap: 0.6rem; }
 .checkbox-row input { width: auto; }
+
+/* ---- Thesis chooser ------------------------------------------------------ */
+.choice-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.choice {
+  display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer;
+  border: 1px solid var(--navy-border); border-radius: 20px; padding: 0.35rem 0.8rem;
+  font-size: 0.8rem; color: var(--text-secondary); transition: all 0.15s ease; user-select: none;
+}
+.choice:hover { border-color: var(--navy-border-hover); color: var(--text-primary); }
+.choice input { width: auto; accent-color: var(--gold); }
+.choice:has(input:checked) { border-color: var(--gold); color: var(--gold); background: var(--gold-glow); }
+.range-row { display: flex; align-items: center; gap: 0.6rem; }
+.range-row input { width: 100px; }
+.range-row span { color: var(--text-muted); font-size: 0.85rem; }
+
+/* ---- Thesis match + source links ----------------------------------------- */
+.match-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; letter-spacing: 0.03em;
+  color: var(--steel-light); border: 1px solid rgba(107,130,160,0.3); border-radius: 4px; padding: 0.1rem 0.4rem;
+}
+.match-badge.strong { color: var(--gold); border-color: var(--navy-border-hover); background: var(--gold-glow); }
+.src-link {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.66rem; color: var(--steel-light);
+  text-decoration: none; border-bottom: 1px dotted rgba(107,130,160,0.5);
+}
+.src-link:hover { color: var(--gold); border-bottom-color: var(--gold); }
+.src-link::before { content: '↗ '; opacity: 0.7; }
+.verify-note {
+  display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}

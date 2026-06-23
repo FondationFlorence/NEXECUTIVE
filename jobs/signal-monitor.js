@@ -1,11 +1,12 @@
 /**
  * Autonomous signal monitor.
  *
- * Simulates the "24/7 monitoring" layer: each run inspects a slice of the
- * target universe and emits fresh M&A signals (alerts) for companies that
- * have gone quiet. In production this is where real data sources (regulatory
- * registers, funding databases, news) would feed in; here it synthesises
- * plausible, sector-aware signals so the product stays live.
+ * Simulates the always-on monitoring layer: each run inspects the quietest
+ * slice of the universe and emits fresh, SOURCED M&A signals. Registry-type
+ * signals link back to the company's official registry record; deal/market
+ * signals link to CFNEWS. In production, real fetchers (Companies House,
+ * BODACC, Infogreffe, CFNEWS) replace the synthesiser here — the schema and
+ * the verifiability contract stay the same.
  *
  * Run via:        node jobs/signal-monitor.js
  * Scheduled via:  polsia.toml [[crons]]
@@ -19,23 +20,17 @@ if (process.env.POLSIA_IN_PROCESS_CRONS_ENABLED !== 'true') {
   process.exit(0);
 }
 
-const REGULATOR_BY_COUNTRY = {
-  Germany: 'BaFin', France: 'AMF', Netherlands: 'ECB', Italy: 'ECB',
-  Spain: 'ECB', Ireland: 'FCA', Belgium: 'ECB',
-};
+const CFNEWS = 'https://www.cfnews.net/';
+const SEVERITIES = ['low', 'medium', 'medium', 'high'];
 
-const SEVERITIES = ['low', 'medium', 'medium', 'high']; // weighted toward medium
-
-// type -> [title, detail builder]
+// type, title, detail builder, sourceKind ('registry' | 'cfnews')
 const TEMPLATES = [
-  ['funding',     'Bridge financing detected',            (c) => `${c.name} insiders extended a bridge round — often a pre-exit liquidity event.`],
-  ['funding',     'New strategic investor on cap table',  (c) => `A larger ${c.sector} player took a minority position in ${c.name}.`],
-  ['leadership',  'CFO transition',                       (c) => `Finance leadership change at ${c.name} — frequently precedes a transaction.`],
-  ['leadership',  'Founder signalled exit openness',      (c) => `Public comments suggest ${c.name}'s founder is open to exploring a sale.`],
-  ['regulatory',  'New regulatory filing detected',       (c) => `Fresh filing for ${c.name}; due-diligence window opening.`],
-  ['market',      'Sector consolidation accelerating',    (c) => `Multiple comparable ${c.sector} deals closed this quarter — multiples expanding.`],
-  ['acquisition', 'Competitor acquired in adjacent segment', (c) => `A ${c.sector} competitor was acquired — likely to re-rate ${c.name}.`],
-  ['litigation',  'Litigation flag cleared',              (c) => `A pending dispute involving ${c.name} was resolved — removes a diligence blocker.`],
+  ['succession',   'Owner approaching retirement',     (c) => `Registry shows ${c.name}'s principal past typical retirement age — succession window opening.`, 'registry'],
+  ['ownership',    'Share-transfer notice filed',      (c) => `An ownership-change entry was filed for ${c.name}.`, 'registry'],
+  ['filing',       'New statutory accounts filed',     (c) => `${c.name} published fresh accounts — refresh the EBITDA read.`, 'registry'],
+  ['availability', 'Owner exploring an exit',          (c) => `${c.name}'s owner signalled openness to a sale (off-market).`, 'registry'],
+  ['deal',         'Comparable transaction closed',    (c) => `A comparable ${c.sector} business changed hands — a fresh multiples reference.`, 'cfnews'],
+  ['market',       'Sector consolidation accelerating',(c) => `Roll-up activity is rising in ${c.sector}.`, 'cfnews'],
 ];
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -60,27 +55,25 @@ async function main() {
   let created = 0;
 
   for (const c of companies) {
-    const [type, title, detailFor] = pick(TEMPLATES);
-    const regulator = type === 'regulatory' ? (REGULATOR_BY_COUNTRY[c.country] || 'ECB') : null;
+    const [type, title, detailFor, sourceKind] = pick(TEMPLATES);
+    const source = sourceKind === 'cfnews' ? 'CFNEWS' : (c.registry || 'Registry');
+    const sourceUrl = sourceKind === 'cfnews' ? CFNEWS + 'l-actualite/' : (c.registry_url || null);
     await create({
       company_id: c.id,
       type,
       severity: pick(SEVERITIES),
       title,
       detail: detailFor(c),
-      source: 'Autonomous monitor',
-      regulator,
+      source,
+      source_url: sourceUrl,
     });
     created++;
-    console.log(`[signal-monitor] ${c.name}: ${type} — ${title}`);
+    console.log(`[signal-monitor] ${c.name}: ${type} — ${title} (${source})`);
   }
 
-  console.log(`[signal-monitor] Done. Emitted ${created} signal(s).`);
+  console.log(`[signal-monitor] Done. Emitted ${created} sourced signal(s).`);
 }
 
 main()
   .then(() => pool.end())
-  .catch((err) => {
-    console.error('[signal-monitor] Fatal:', err.message);
-    process.exit(1);
-  });
+  .catch((err) => { console.error('[signal-monitor] Fatal:', err.message); process.exit(1); });

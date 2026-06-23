@@ -1,4 +1,12 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /onboarding
+Disallow: /targets
+Disallow: /alerts
+Disallow: /pipeline
+Disallow: /settings
+Disallow: /company/
+Disallow: /api/
 
 Sitemap: https://nexecutive.polsia.app/sitemap.xml

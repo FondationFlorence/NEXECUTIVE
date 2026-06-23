@@ -6,16 +6,52 @@
     <div>
       <p class="eyebrow">Account</p>
       <h1 class="page-title">Settings</h1>
-      <p class="page-sub">Briefing delivery and account status.</p>
+      <p class="page-sub">Your thesis, briefing delivery, and account.</p>
     </div>
   </div>
 
-  <% if (saved) { %><div class="toast">✓ Settings saved.</div><% } %>
+  <% if (saved) { %><div class="toast">✓ Saved.</div><% } %>
+
+  <section class="panel" style="margin-bottom:1.25rem;">
+    <div class="panel-head"><span class="panel-title">Acquisition thesis</span></div>
+    <p class="page-sub" style="margin-bottom:1.25rem;">Saving refreshes your shortlist with any new matching targets.</p>
+    <form method="post" action="/app/settings/thesis">
+      <div class="form-row" style="margin-bottom:1.25rem;">
+        <label>Sectors</label>
+        <div class="choice-grid">
+          <% sectors.forEach(function(s){ %>
+            <label class="choice"><input type="checkbox" name="sectors" value="<%= s %>" <%= (thesis && (thesis.sectors||[]).includes(s)) ? 'checked' : '' %>> <%= s %></label>
+          <% }) %>
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom:1.25rem;">
+        <label>Geographies</label>
+        <div class="choice-grid">
+          <% countries.forEach(function(c){ %>
+            <label class="choice"><input type="checkbox" name="countries" value="<%= c %>" <%= (thesis && (thesis.countries||[]).includes(c)) ? 'checked' : '' %>> <%= c %></label>
+          <% }) %>
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom:1.25rem;">
+        <label>Revenue band (€M)</label>
+        <div class="range-row">
+          <input type="number" name="rev_min" min="0" step="0.5" placeholder="min" value="<%= thesis && thesis.rev_min ? (thesis.rev_min/1e6) : '' %>">
+          <span>to</span>
+          <input type="number" name="rev_max" min="0" step="0.5" placeholder="max" value="<%= thesis && thesis.rev_max ? (thesis.rev_max/1e6) : '' %>">
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom:1.5rem;">
+        <label>Keywords</label>
+        <input type="text" name="keywords" value="<%= thesis ? (thesis.keywords||'') : '' %>" placeholder="recurring revenue, succession…" style="max-width:460px;">
+      </div>
+      <button type="submit" class="btn btn-gold">Save thesis &amp; refresh shortlist</button>
+    </form>
+  </section>
 
   <div class="grid grid-2">
     <section class="panel">
-      <div class="panel-head"><span class="panel-title">Executive briefing digest</span></div>
-      <p class="page-sub" style="margin-bottom:1.25rem;">How often Nexecutive emails you a roundup of new signals across your watchlist.</p>
+      <div class="panel-head"><span class="panel-title">Briefing digest</span></div>
+      <p class="page-sub" style="margin-bottom:1.25rem;">How often we email a roundup of new sourced signals across your shortlist.</p>
       <form method="post" action="/app/settings/digest" class="form-grid">
         <div class="form-row">
           <label for="frequency">Frequency</label>
@@ -37,7 +73,7 @@
           <input type="checkbox" name="enabled" id="enabled" <%= digest.enabled ? 'checked' : '' %>>
           <label for="enabled" style="margin:0;">Digest enabled</label>
         </div>
-        <div><button type="submit" class="btn btn-gold">Save settings</button></div>
+        <div><button type="submit" class="btn btn-gold">Save digest</button></div>
       </form>
     </section>
 

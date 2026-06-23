@@ -1,9 +1,12 @@
 /**
  * Deal Brief Agent.
  *
- * Generates an executive-ready M&A briefing for a target from its
- * fundamentals, recent signals, and fit score. Uses OpenAI when
- * OPENAI_API_KEY is configured; otherwise falls back to a deterministic
+ * Generates an executive-ready acquisition brief for a searcher. The core
+ * promise is verifiability: every signal carries its primary source, and the
+ * brief ends with a Sources section linking each claim to an official document
+ * (registry filing, BODACC notice, CFNEWS article…).
+ *
+ * Uses OpenAI when OPENAI_API_KEY is configured; otherwise a deterministic
  * template so the feature works in every environment.
  *
  *   generateBrief(company, signals, score) -> { content, model }
@@ -24,12 +27,13 @@ function factSheet(company) {
     `Name: ${company.name}`,
     `Sector: ${company.sector}`,
     `HQ: ${[company.hq_city, company.country].filter(Boolean).join(', ')}`,
+    `Registry: ${company.registry || '—'}${company.registry_url ? ` (${company.registry_url})` : ''}`,
     `Founded: ${company.founded_year || '—'}`,
     `Employees: ${company.employees ?? '—'}`,
     `Revenue: ${eur(company.revenue_eur)}`,
-    company.arr_eur ? `ARR: ${eur(company.arr_eur)}` : null,
-    `Growth: ${company.growth_rate != null ? company.growth_rate + '% YoY' : '—'}`,
-    `Funding stage: ${company.funding_stage || '—'}`,
+    company.ebitda_eur ? `EBITDA: ${eur(company.ebitda_eur)}` : null,
+    `Owner age: ${company.owner_age || '—'}`,
+    `Availability: ${company.availability || '—'}`,
     `Ownership: ${company.ownership || '—'}`,
     `Indicative valuation: ${eur(company.valuation_eur)}`,
     `Description: ${company.description || '—'}`,
@@ -38,51 +42,61 @@ function factSheet(company) {
 
 function signalLines(signals) {
   if (!signals || signals.length === 0) return 'No active signals in the monitoring window.';
-  return signals
-    .slice(0, 8)
-    .map((s) => {
-      const when = new Date(s.signal_date || s.created_at).toISOString().slice(0, 10);
-      const reg = s.regulator ? ` [${s.regulator}]` : '';
-      return `- (${when}, ${s.severity}/${s.type}${reg}) ${s.title}${s.detail ? ' — ' + s.detail : ''}`;
-    })
-    .join('\n');
+  return signals.slice(0, 8).map((s) => {
+    const when = new Date(s.signal_date || s.created_at).toISOString().slice(0, 10);
+    const src = s.source_url ? ` ([${s.source || 'source'}](${s.source_url}))` : s.source ? ` (${s.source})` : '';
+    return `- (${when}, ${s.severity}/${s.type}) ${s.title}${s.detail ? ' — ' + s.detail : ''}${src}`;
+  }).join('\n');
+}
+
+function sourcesBlock(company, signals) {
+  const lines = [];
+  if (company.registry_url) lines.push(`- Company record — [${company.registry || 'Registry'}](${company.registry_url})`);
+  for (const s of signals || []) {
+    if (s.source_url) lines.push(`- ${s.title} — [${s.source || 'source'}](${s.source_url})`);
+  }
+  return lines.length ? lines.join('\n') : '- No source links available for this target yet.';
 }
 
 /** Deterministic template brief — no external calls. */
 function templateBrief(company, signals, score) {
   const s = score || scoreCompany(company, { signals });
-  const high = (signals || []).filter((x) => x.severity === 'high');
-  const regulators = [...new Set((signals || []).map((x) => x.regulator).filter(Boolean))];
+  const margin = company.ebitda_eur && company.revenue_eur
+    ? Math.round((company.ebitda_eur / company.revenue_eur) * 100) : null;
 
-  const nextStep = s.total >= 75
-    ? 'Move to outreach this week — fit is strong and signal momentum is live.'
+  const nextMove = s.total >= 75
+    ? 'Originate now — the succession/availability window is open and the score is high. Draft a direct, owner-to-owner approach.'
     : s.total >= 55
-      ? 'Add to the active screening list and set a 30-day signal trigger.'
-      : 'Keep on the watchlist; revisit if a funding, leadership, or regulatory signal fires.';
+      ? 'Add to the active shortlist and set a trigger on the next ownership or filing signal before approaching.'
+      : 'Keep monitoring; revisit when a succession, availability, or deal signal fires.';
 
-  return `# Deal Brief — ${company.name}
+  return `# Acquisition Brief — ${company.name}
 
 **Fit score: ${s.total}/100 (${s.band})** · Top drivers: ${s.drivers.join(', ')}
 
 ## Snapshot
-${company.name} is a ${company.sector} company headquartered in ${[company.hq_city, company.country].filter(Boolean).join(', ')}, founded ${company.founded_year || 'n/a'}. It runs at ${eur(company.revenue_eur)} revenue${company.arr_eur ? ` (${eur(company.arr_eur)} ARR)` : ''} with ${company.growth_rate != null ? company.growth_rate + '% YoY growth' : 'undisclosed growth'}, ${company.ownership || 'privately'}-held, indicative valuation ${eur(company.valuation_eur)}.
+${company.name} is a ${company.sector} business in ${[company.hq_city, company.country].filter(Boolean).join(', ')}, founded ${company.founded_year || 'n/a'}, ~${company.employees ?? 'n/a'} staff. Revenue ${eur(company.revenue_eur)}${company.ebitda_eur ? `, EBITDA ${eur(company.ebitda_eur)}${margin != null ? ` (${margin}% margin)` : ''}` : ''}. ${company.ownership ? company.ownership.replace('-', ' ') : 'Privately'} held, indicative valuation ${eur(company.valuation_eur)}.
 
-## Strategic rationale
-- Sector heat scores ${company.sector_heat ?? 'n/a'}/100 — ${company.sector_heat >= 75 ? 'active consolidation, multiples expanding' : company.sector_heat >= 55 ? 'warming, selective deal flow' : 'stable, opportunistic only'}.
-- Size sits ${Number(company.revenue_eur || 0) / 1e6 <= 150 && Number(company.revenue_eur || 0) / 1e6 >= 20 ? 'inside' : 'outside'} the mid-market sweet spot.
-- Ownership (${company.ownership || 'private'}) is ${['pe-backed', 'vc-backed', 'family-owned'].includes((company.ownership || '').toLowerCase()) ? 'favourable — a transaction window is plausible' : 'less immediately transactable'}.
+## Why it's ripe now
+- Owner ${company.owner_age ? `aged ${company.owner_age}` : 'age undisclosed'}, status **${company.availability || 'unknown'}** — ${company.owner_age >= 62 ? 'a credible succession window' : 'monitor for a succession trigger'}.
+- Sector heat ${company.sector_heat ?? 'n/a'}/100 — ${company.sector_heat >= 75 ? 'active roll-up; act before consolidators do' : company.sector_heat >= 55 ? 'warming; selective competition' : 'quiet; originate off-market'}.
+- Size ${Number(company.revenue_eur || 0) / 1e6 <= 20 && Number(company.revenue_eur || 0) / 1e6 >= 3 ? 'sits inside' : 'sits outside'} the lower-mid-market sweet spot.
 
-## Signal summary
+## Signal trail (sourced)
 ${signalLines(signals)}
-${high.length ? `\n**${high.length} high-severity signal${high.length === 1 ? '' : 's'} active.**` : ''}
 
-## Regulatory & compliance
-${regulators.length ? `Flags from: ${regulators.join(', ')}. Confirm filing status before an NDA.` : 'No active regulatory flags in the monitoring window. Standard EU/GDPR diligence applies.'}
+## What to verify next
+- Pull the latest statutory accounts from the registry and confirm the EBITDA margin.
+- Confirm the ownership/PSC structure and any registered charges.
+- Validate the availability signal directly before committing diligence time.
 
-## Recommended next step
-${nextStep}
+## Recommended next move
+${nextMove}
 
-_Generated by Nexecutive — template engine (configure OPENAI_API_KEY for narrative briefs)._`;
+## Sources
+${sourcesBlock(company, signals)}
+
+_Generated by Nexecutive — template engine. Every claim above links to a primary source. Configure OPENAI_API_KEY for narrative briefs._`;
 }
 
 /** OpenAI-backed narrative brief. Throws on any API/SDK error. */
@@ -92,17 +106,19 @@ async function openaiBrief(company, signals, score) {
   const s = score || scoreCompany(company, { signals });
 
   const system =
-    'You are a senior M&A analyst at a corporate development desk. Write concise, ' +
-    'executive-ready deal briefs in Markdown. Be specific, quantitative, and neutral. ' +
-    'Never invent figures beyond the data provided. Use these sections: Snapshot, ' +
-    'Strategic rationale, Signal summary, Regulatory & compliance, Valuation context, ' +
-    'Recommended next step.';
+    'You are a senior analyst at a search fund / ETA acquirer. Write concise, ' +
+    'executive-ready acquisition briefs in Markdown for an individual buyer purchasing ONE ' +
+    'lower-mid-market company. Be specific and quantitative. NEVER invent figures beyond the ' +
+    'data provided. Every factual claim must be traceable to a provided source. Use these ' +
+    'sections: Snapshot, Why it\'s ripe now, Signal trail (sourced), What to verify next, ' +
+    'Recommended next move, Sources. In the Sources section, list each signal as a Markdown ' +
+    'link to its source URL.';
 
   const user =
-    `Write a deal brief for this acquisition target.\n\n` +
+    `Write an acquisition brief for this target.\n\n` +
     `FIT SCORE: ${s.total}/100 (${s.band}); top drivers: ${s.drivers.join(', ')}\n\n` +
     `FUNDAMENTALS:\n${factSheet(company)}\n\n` +
-    `RECENT SIGNALS:\n${signalLines(signals)}\n`;
+    `SOURCED SIGNALS:\n${signalLines(signals)}\n`;
 
   const resp = await client.chat.completions.create({
     model: MODEL,
@@ -111,7 +127,7 @@ async function openaiBrief(company, signals, score) {
       { role: 'user', content: user },
     ],
     temperature: 0.4,
-    max_tokens: 900,
+    max_tokens: 1000,
   });
 
   const content = resp.choices?.[0]?.message?.content?.trim();

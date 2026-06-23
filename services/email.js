@@ -168,4 +168,91 @@ async function sendTrialEmail(user, dayNum) {
   }
 }
 
-module.exports = { sendTrialEmail, TRIAL_EMAILS };
+// --- Behavioral nurture ----------------------------------------------------
+// Replaces the fixed-day cadence: branch on what the user actually did.
+
+const APP_URL = 'https://nexecutive.polsia.app';
+const PRICING_URL = 'https://nexecutive.polsia.app#pricing';
+
+const BEHAVIORAL = {
+  activated: { subject: 'You found live targets — here’s the case to keep going', stream: 'nurture-activated' },
+  dormant:   { subject: 'A target we think fits your thesis', stream: 'nurture-dormant' },
+};
+
+function buildBehavioralBody(kind, user, ctx = {}) {
+  const hi = `Hi${user.name ? ' ' + user.name : ''},`;
+  if (kind === 'activated') {
+    return `
+${hi}
+
+You've put ${ctx.shortlistCount || 'several'} targets on your shortlist and started working them — that's exactly the point.
+
+Here's the case to keep going: a single proprietary, sourced lead that closes is worth orders of magnitude more than the subscription. Nexecutive keeps monitoring every target on your list and flags the next ownership, succession, or deal signal the moment it's filed — each one linked to the primary source so you can act with conviction.
+
+Lock in your access before the trial ends → ${PRICING_URL}
+
+Reply if you want a hand sharpening your thesis.
+`.trim();
+  }
+  // dormant
+  const ex = ctx.example;
+  const exampleBlock = ex
+    ? `Based on your thesis, here's one that stands out:
+
+• ${ex.name} — ${ex.sector}, ${ex.country}
+  ${ex.reason}
+  Fit score ${ex.score}/100. Every signal traces to ${ex.source || 'an official registry'}.
+
+See the full sourced brief → ${APP_URL}/company/${ex.slug}`
+    : `Tell us your thesis and we'll show you matching targets instantly — each traced to an official source.
+
+Build your shortlist → ${APP_URL}/onboarding`;
+
+  return `
+${hi}
+
+You haven't run your thesis yet — so here's the value up front, no work required.
+
+${exampleBlock}
+
+That's the whole idea: you give us the mandate, we surface targets you can verify. Off-market businesses with real succession signals, not recycled broker listings.
+
+${ex ? 'Build your full shortlist → ' + APP_URL + '/onboarding' : ''}
+`.trim();
+}
+
+/** Send a behavioral nurture email. Returns true on success (or in dry-run). */
+async function sendBehavioralEmail(user, kind, ctx = {}) {
+  const config = BEHAVIORAL[kind];
+  if (!config) throw new Error(`No behavioral config for ${kind}`);
+  const body = buildBehavioralBody(kind, user, ctx);
+
+  if (process.env.EMAIL_DRY_RUN === 'true' || !process.env.POSTMARK_API_KEY) {
+    console.log(`[email] DRY-RUN ${kind} -> ${user.email}\n${body}\n`);
+    return true;
+  }
+
+  try {
+    const result = await postmarkRequest({
+      From: `${FROM_NAME} <${FROM_EMAIL}>`,
+      To: user.email,
+      Subject: config.subject,
+      HtmlBody: body.replace(/\n/g, '<br>'),
+      TextBody: body,
+      TrackOpens: true,
+      MessageStream: config.stream,
+      Metadata: { user_id: String(user.id), nurture: kind },
+    });
+    if (result.ErrorCode !== 0) {
+      console.error(`[email] Postmark error for ${user.email} ${kind}: ${result.Message}`);
+      return false;
+    }
+    console.log(`[email] Sent ${kind} to ${user.email} (MessageID: ${result.MessageID})`);
+    return true;
+  } catch (err) {
+    console.error(`[email] Failed to send ${kind} to ${user.email}:`, err.message);
+    return false;
+  }
+}
+
+module.exports = { sendTrialEmail, TRIAL_EMAILS, sendBehavioralEmail, buildBehavioralBody };

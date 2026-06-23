@@ -5,30 +5,9 @@
 const express = require('express');
 const router = express.Router();
 
-const pixelHelper = `
-<script src="/js/pixel.js"></script>
-<script>
-(function () {
-  var params = new URLSearchParams(window.location.search);
-  var amount = params.get('amount') || '0';
-  var currency = params.get('currency') || 'EUR';
-  var plan = params.get('plan') || 'unknown';
-  var billing = params.get('billing') || 'annual';
-
-  if (typeof window._nexecutivePixel !== 'undefined') {
-    var amountNum = parseFloat(amount);
-    if (!isNaN(amountNum)) {
-      window._nexecutivePixel.firePurchase(amountNum, currency, plan, billing);
-    }
-  }
-})();
-</script>
-`;
-
 // Stripe webhook endpoint
 router.post('/webhook/stripe', express.raw({ type: 'application/json' }), (req, res) => {
-  // Webhook handler would go here for production Stripe integration
-  // For now, the success page fires Purchase via pixel.js
+  // Webhook handler would go here for production Stripe integration.
   res.json({ received: true });
 });
 
@@ -57,10 +36,9 @@ router.get('/success', (req, res) => {
   <div class="card">
     <div class="icon">&#10004;</div>
     <h1>Payment Confirmed</h1>
-    <p>Thank you! Your subscription is active. Nexecutive is now monitoring M&A targets for your team.</p>
+    <p>Thank you! Your subscription is active. Nexecutive is now monitoring your shortlist and sourcing new targets — every signal traced to its source.</p>
     <a href="/">Back to Nexecutive</a>
   </div>
-  ${pixelHelper}
 </body>
 </html>
 `;

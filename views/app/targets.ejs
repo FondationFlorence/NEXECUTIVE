@@ -6,7 +6,7 @@
     <div>
       <p class="eyebrow">Screening engine</p>
       <h1 class="page-title">Target universe</h1>
-      <p class="page-sub"><%= fmt.num(total) %> companies monitored · ranked by acquisition-fit score</p>
+      <p class="page-sub"><%= fmt.num(total) %> European lower-mid-market targets · every record tied to its official registry</p>
     </div>
   </div>
 
@@ -40,11 +40,13 @@
               <span class="tag sector"><%= c.sector %></span>
               <span class="dot"><%= c.hq_city ? c.hq_city + ', ' : '' %><%= c.country %></span>
               <span class="dot"><%= fmt.eur(c.revenue_eur) %> rev</span>
-              <% if (c.growth_rate) { %><span class="dot"><%= c.growth_rate %>% growth</span><% } %>
-              <% if (c.signals.length) { %><span class="tag signal"><%= c.signals.length %> signal<%= c.signals.length === 1 ? '' : 's' %></span><% } %>
+              <% if (c.owner_age) { %><span class="dot">owner <%= c.owner_age %></span><% } %>
+              <% if (c.availability) { %><span class="tag signal"><%= c.availability %></span><% } %>
+              <% if (c.registry_url) { %><a class="src-link" href="<%= c.registry_url %>" target="_blank" rel="noopener"><%= c.registry %></a><% } %>
             </div>
           </div>
           <div class="target-side">
+            <% if (hasThesis) { %><span class="match-badge <%= c.match.match >= 70 ? 'strong' : '' %>"><%= c.match.match %>%</span><% } %>
             <span class="score score-<%= c.score.band.toLowerCase() %>"><b><%= c.score.total %></b>/100</span>
             <% if (watchedIds.has(c.id)) { %>
               <form method="post" action="/app/watchlist/remove" class="inline-form">
