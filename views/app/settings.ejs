@@ -1,0 +1,60 @@
+<%- include('../partials/app-head', { title: 'Settings — Nexecutive' }) %>
+<%- include('../partials/app-nav') %>
+
+<main class="app-shell">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Account</p>
+      <h1 class="page-title">Settings</h1>
+      <p class="page-sub">Briefing delivery and account status.</p>
+    </div>
+  </div>
+
+  <% if (saved) { %><div class="toast">✓ Settings saved.</div><% } %>
+
+  <div class="grid grid-2">
+    <section class="panel">
+      <div class="panel-head"><span class="panel-title">Executive briefing digest</span></div>
+      <p class="page-sub" style="margin-bottom:1.25rem;">How often Nexecutive emails you a roundup of new signals across your watchlist.</p>
+      <form method="post" action="/app/settings/digest" class="form-grid">
+        <div class="form-row">
+          <label for="frequency">Frequency</label>
+          <select name="frequency" id="frequency">
+            <option value="off"    <%= digest.frequency === 'off' ? 'selected' : '' %>>Off</option>
+            <option value="daily"  <%= digest.frequency === 'daily' ? 'selected' : '' %>>Daily</option>
+            <option value="weekly" <%= digest.frequency === 'weekly' ? 'selected' : '' %>>Weekly</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="hour_utc">Delivery hour (UTC)</label>
+          <select name="hour_utc" id="hour_utc">
+            <% for (var h = 0; h < 24; h++) { %>
+              <option value="<%= h %>" <%= digest.hour_utc === h ? 'selected' : '' %>><%= String(h).padStart(2,'0') %>:00</option>
+            <% } %>
+          </select>
+        </div>
+        <div class="form-row checkbox-row">
+          <input type="checkbox" name="enabled" id="enabled" <%= digest.enabled ? 'checked' : '' %>>
+          <label for="enabled" style="margin:0;">Digest enabled</label>
+        </div>
+        <div><button type="submit" class="btn btn-gold">Save settings</button></div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><span class="panel-title">Account</span></div>
+      <div class="facts" style="grid-template-columns:1fr;">
+        <div><div class="fact-label">Name</div><div class="fact-value"><%= user.name || '—' %></div></div>
+        <div><div class="fact-label">Email</div><div class="fact-value"><%= user.email %></div></div>
+        <div><div class="fact-label">Plan</div><div class="fact-value">
+          <% if (trial.isPaid) { %>Active subscription<% } else if (trial.isExpired) { %>Trial ended<% } else { %>Free trial — <%= trial.daysRemaining %> day<%= trial.daysRemaining === 1 ? '' : 's' %> left<% } %>
+        </div></div>
+      </div>
+      <% if (!trial.isPaid) { %>
+        <div style="margin-top:1.25rem;"><a href="/#pricing" class="btn">Upgrade plan</a></div>
+      <% } %>
+    </section>
+  </div>
+</main>
+</body>
+</html>

@@ -6,3 +6,9 @@ name = "nexecutive"
 name = "trial-email-scheduler"
 schedule = "0 8 * * *"
 command = "node jobs/trial-email-scheduler.js"
+
+# Every 6 hours — autonomous monitor emits fresh M&A signals across the universe
+[[crons]]
+name = "signal-monitor"
+schedule = "0 */6 * * *"
+command = "node jobs/signal-monitor.js"

@@ -1,0 +1,55 @@
+<%- include('../partials/app-head', { title: 'Pipeline — Nexecutive' }) %>
+<%- include('../partials/app-nav') %>
+
+<main class="app-shell">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Deal pipeline</p>
+      <h1 class="page-title">Pipeline</h1>
+      <p class="page-sub"><%= total %> active deal<%= total === 1 ? '' : 's' %> · move targets through your process.</p>
+    </div>
+    <a href="/targets" class="btn btn-gold">Add targets</a>
+  </div>
+
+  <% if (total === 0) { %>
+    <section class="panel">
+      <div class="empty">
+        <h3>Your pipeline is empty</h3>
+        <p>Add a company to the pipeline from its profile to start tracking it.</p>
+        <p style="margin-top:1rem;"><a href="/targets" class="btn btn-gold">Screen targets</a></p>
+      </div>
+    </section>
+  <% } else { %>
+    <div class="board">
+      <% stages.forEach(function(stage){ %>
+        <div class="board-col">
+          <div class="board-col-head">
+            <span class="board-col-title"><%= fmt.title(stage) %></span>
+            <span class="board-col-count"><%= byStage[stage].length %></span>
+          </div>
+          <% byStage[stage].forEach(function(d){ %>
+            <div class="deal-card">
+              <a href="/company/<%= d.company_slug %>" class="deal-card-name"><%= d.company_name %></a>
+              <div class="deal-card-meta"><%= d.sector %> · <%= d.country %></div>
+              <% if (d.next_step) { %><div class="deal-next">→ <%= d.next_step %></div><% } %>
+              <div class="deal-move">
+                <form method="post" action="/app/pipeline/move" class="inline-form" style="flex:1;">
+                  <input type="hidden" name="deal_id" value="<%= d.id %>">
+                  <select name="stage" onchange="this.form.submit()">
+                    <% stages.forEach(function(s){ %><option value="<%= s %>" <%= s === stage ? 'selected' : '' %>><%= fmt.title(s) %></option><% }) %>
+                  </select>
+                </form>
+                <form method="post" action="/app/pipeline/remove" class="inline-form">
+                  <input type="hidden" name="deal_id" value="<%= d.id %>">
+                  <button class="btn btn-sm btn-ghost" title="Remove">✕</button>
+                </form>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</main>
+</body>
+</html>

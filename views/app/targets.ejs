@@ -1,0 +1,69 @@
+<%- include('../partials/app-head', { title: 'Targets — Nexecutive' }) %>
+<%- include('../partials/app-nav') %>
+
+<main class="app-shell">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Screening engine</p>
+      <h1 class="page-title">Target universe</h1>
+      <p class="page-sub"><%= fmt.num(total) %> companies monitored · ranked by acquisition-fit score</p>
+    </div>
+  </div>
+
+  <form method="get" action="/targets" class="filters">
+    <input type="search" name="q" placeholder="Search name or description…" value="<%= filters.q %>">
+    <select name="sector">
+      <option value="">All sectors</option>
+      <% sectors.forEach(function(s){ %><option value="<%= s %>" <%= filters.sector === s ? 'selected' : '' %>><%= s %></option><% }) %>
+    </select>
+    <select name="country">
+      <option value="">All countries</option>
+      <% countries.forEach(function(c){ %><option value="<%= c %>" <%= filters.country === c ? 'selected' : '' %>><%= c %></option><% }) %>
+    </select>
+    <select name="ownership">
+      <option value="">All ownership</option>
+      <% ownerships.forEach(function(o){ %><option value="<%= o %>" <%= filters.ownership === o ? 'selected' : '' %>><%= fmt.title(o) %></option><% }) %>
+    </select>
+    <button type="submit" class="btn btn-sm">Filter</button>
+    <a href="/targets" class="btn btn-sm btn-ghost">Reset</a>
+  </form>
+
+  <section class="panel">
+    <% if (companies.length === 0) { %>
+      <div class="empty"><h3>No matches</h3><p>Try widening your filters.</p></div>
+    <% } else { %>
+      <% companies.forEach(function(c) { %>
+        <div class="target-row">
+          <div class="target-main">
+            <a href="/company/<%= c.slug %>" class="target-name"><%= c.name %></a>
+            <div class="target-meta">
+              <span class="tag sector"><%= c.sector %></span>
+              <span class="dot"><%= c.hq_city ? c.hq_city + ', ' : '' %><%= c.country %></span>
+              <span class="dot"><%= fmt.eur(c.revenue_eur) %> rev</span>
+              <% if (c.growth_rate) { %><span class="dot"><%= c.growth_rate %>% growth</span><% } %>
+              <% if (c.signals.length) { %><span class="tag signal"><%= c.signals.length %> signal<%= c.signals.length === 1 ? '' : 's' %></span><% } %>
+            </div>
+          </div>
+          <div class="target-side">
+            <span class="score score-<%= c.score.band.toLowerCase() %>"><b><%= c.score.total %></b>/100</span>
+            <% if (watchedIds.has(c.id)) { %>
+              <form method="post" action="/app/watchlist/remove" class="inline-form">
+                <input type="hidden" name="company_id" value="<%= c.id %>">
+                <input type="hidden" name="return_to" value="/targets">
+                <button type="submit" class="btn btn-sm btn-ghost">Watching ✓</button>
+              </form>
+            <% } else { %>
+              <form method="post" action="/app/watchlist/add" class="inline-form">
+                <input type="hidden" name="company_id" value="<%= c.id %>">
+                <input type="hidden" name="return_to" value="/targets">
+                <button type="submit" class="btn btn-sm">+ Watch</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </section>
+</main>
+</body>
+</html>

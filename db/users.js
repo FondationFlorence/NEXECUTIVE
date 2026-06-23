@@ -8,13 +8,15 @@ const EMAIL_DAY7 = 2;   // 0010
 const EMAIL_DAY13 = 4;  // 0100
 const EMAIL_DAY15 = 8;  // 1000
 
-/** Return trial users who need email N (bit not set in email_sequence_sent). */
+/** Return trial users who need email N (bit not set in email_sequence_sent).
+ *  Trial users are created with subscription_status = 'trial'; only paid
+ *  ('active') users are excluded from the nurture sequence. */
 async function getUsersNeedingEmail(bitMask) {
   const r = await pool.query(
     `SELECT id, email, name, trial_start_date, email_sequence_sent
      FROM users
      WHERE trial_start_date IS NOT NULL
-       AND subscription_status IS NULL
+       AND subscription_status IS DISTINCT FROM 'active'
        AND email_sequence_sent & $1 = 0`,
     [bitMask],
   );

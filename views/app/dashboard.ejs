@@ -1,0 +1,117 @@
+<%- include('../partials/app-head', { title: 'Dashboard — Nexecutive' }) %>
+<%- include('../partials/app-nav') %>
+
+<main class="app-shell">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Workspace</p>
+      <h1 class="page-title">Deal intelligence overview</h1>
+      <p class="page-sub">Live M&amp;A signals across the targets you monitor.</p>
+    </div>
+    <a href="/targets" class="btn btn-gold">Find targets</a>
+  </div>
+
+  <% if (trial.isExpired) { %>
+    <div class="banner warn">
+      <span>Your free trial has ended. Subscribe to keep monitoring and generating briefs.</span>
+      <a href="/#pricing" class="btn btn-sm">View plans</a>
+    </div>
+  <% } else if (!trial.isPaid) { %>
+    <div class="banner">
+      <span>You're on a free trial — <strong><%= trial.daysRemaining %> day<%= trial.daysRemaining === 1 ? '' : 's' %></strong> of full access remaining.</span>
+      <a href="/#pricing" class="btn btn-sm">Upgrade</a>
+    </div>
+  <% } %>
+
+  <div class="stat-strip">
+    <div class="stat"><div class="stat-label">Universe monitored</div><div class="stat-value"><%= fmt.num(stats.universe) %></div></div>
+    <div class="stat"><div class="stat-label">On your watchlist</div><div class="stat-value"><%= stats.watching %></div></div>
+    <div class="stat"><div class="stat-label">Signals · 30d</div><div class="stat-value gold"><%= stats.signals30d %></div></div>
+    <div class="stat"><div class="stat-label">Hot targets</div><div class="stat-value gold"><%= stats.hot %></div></div>
+  </div>
+
+  <div class="grid grid-2">
+    <!-- Watchlist -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Your watchlist</span>
+        <a href="/targets" class="panel-link">Browse universe →</a>
+      </div>
+
+      <% if (watchlist.length === 0) { %>
+        <div class="empty">
+          <h3>No targets yet</h3>
+          <p>Add companies from the target universe to start monitoring them.</p>
+          <p style="margin-top:1rem;"><a href="/targets" class="btn btn-gold">Screen targets</a></p>
+        </div>
+      <% } else { %>
+        <% watchlist.forEach(function(c) { %>
+          <div class="target-row">
+            <div class="target-main">
+              <a href="/company/<%= c.slug %>" class="target-name"><%= c.name %></a>
+              <div class="target-meta">
+                <span class="tag sector"><%= c.sector %></span>
+                <span class="dot"><%= c.country %></span>
+                <% if (c.signals.length) { %><span class="dot"><%= c.signals.length %> signal<%= c.signals.length === 1 ? '' : 's' %></span><% } %>
+                <span class="dot"><%= fmt.eur(c.revenue_eur) %> rev</span>
+              </div>
+            </div>
+            <div class="target-side">
+              <span class="score score-<%= c.score.band.toLowerCase() %>"><b><%= c.score.total %></b>/100</span>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </section>
+
+    <!-- Right column -->
+    <div class="grid">
+      <section class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Live signals</span>
+          <a href="/alerts" class="panel-link">All →</a>
+        </div>
+        <% if (recentAlerts.length === 0) { %>
+          <p class="page-sub">No signals on your watchlist yet.</p>
+        <% } else { %>
+          <% recentAlerts.slice(0, 6).forEach(function(a) { %>
+            <div class="alert-item">
+              <div class="alert-rail <%= fmt.sev(a.severity) %>"></div>
+              <div class="alert-body">
+                <div class="alert-title"><%= a.title %></div>
+                <div class="alert-foot">
+                  <a href="/company/<%= a.company_slug %>" class="reg-chip" style="text-decoration:none;color:var(--gold-dim)"><%= a.company_name %></a>
+                  <span class="sev-chip <%= fmt.sev(a.severity) %>"><%= a.severity %></span>
+                  <% if (a.regulator) { %><span class="reg-chip"><%= a.regulator %></span><% } %>
+                  <span><%= fmt.timeAgo(a.signal_date) %></span>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        <% } %>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Pipeline</span>
+          <a href="/pipeline" class="panel-link">Board →</a>
+        </div>
+        <% if (pipeline.length === 0) { %>
+          <p class="page-sub">No active deals. Add a target to your pipeline from its profile.</p>
+        <% } else { %>
+          <% pipeline.slice(0, 6).forEach(function(d) { %>
+            <div class="target-row">
+              <div class="target-main">
+                <a href="/company/<%= d.company_slug %>" class="target-name" style="font-size:0.88rem"><%= d.company_name %></a>
+                <% if (d.next_step) { %><div class="target-meta"><%= d.next_step %></div><% } %>
+              </div>
+              <span class="tag"><%= fmt.title(d.stage) %></span>
+            </div>
+          <% }) %>
+        <% } %>
+      </section>
+    </div>
+  </div>
+</main>
+</body>
+</html>

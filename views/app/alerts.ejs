@@ -1,0 +1,41 @@
+<%- include('../partials/app-head', { title: 'Alerts — Nexecutive' }) %>
+<%- include('../partials/app-nav') %>
+
+<main class="app-shell">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Signal feed</p>
+      <h1 class="page-title">Alerts</h1>
+      <p class="page-sub">M&amp;A signals across the companies you monitor, newest first.</p>
+    </div>
+  </div>
+
+  <section class="panel">
+    <% if (alerts.length === 0) { %>
+      <div class="empty">
+        <h3>No signals yet</h3>
+        <p>Add targets to your watchlist and signals will surface here as they fire.</p>
+        <p style="margin-top:1rem;"><a href="/targets" class="btn btn-gold">Screen targets</a></p>
+      </div>
+    <% } else { %>
+      <% alerts.forEach(function(a){ %>
+        <div class="alert-item">
+          <div class="alert-rail <%= fmt.sev(a.severity) %>"></div>
+          <div class="alert-body">
+            <div class="alert-title"><%= a.title %></div>
+            <% if (a.detail) { %><div class="alert-detail"><%= a.detail %></div><% } %>
+            <div class="alert-foot">
+              <a href="/company/<%= a.company_slug %>" class="reg-chip" style="text-decoration:none;color:var(--gold-dim)"><%= a.company_name %></a>
+              <span class="sev-chip <%= fmt.sev(a.severity) %>"><%= a.severity %></span>
+              <span class="reg-chip"><%= fmt.title(a.type) %></span>
+              <% if (a.regulator) { %><span class="reg-chip"><%= a.regulator %></span><% } %>
+              <span><%= fmt.timeAgo(a.signal_date) %></span>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </section>
+</main>
+</body>
+</html>

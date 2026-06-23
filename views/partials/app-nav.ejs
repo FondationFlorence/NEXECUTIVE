@@ -1,0 +1,23 @@
+<header class="app-topbar">
+  <div class="app-topbar-inner">
+    <a href="/dashboard" class="app-brand">Nexecutive<span class="app-brand-dot">.</span></a>
+    <nav class="app-nav">
+      <a href="/dashboard" class="<%= nav === 'dashboard' ? 'active' : '' %>">Dashboard</a>
+      <a href="/targets"   class="<%= nav === 'targets' ? 'active' : '' %>">Targets</a>
+      <a href="/alerts"    class="<%= nav === 'alerts' ? 'active' : '' %>">Alerts</a>
+      <a href="/pipeline"  class="<%= nav === 'pipeline' ? 'active' : '' %>">Pipeline</a>
+      <a href="/settings"  class="<%= nav === 'settings' ? 'active' : '' %>">Settings</a>
+    </nav>
+    <div class="app-user">
+      <% if (typeof trial !== 'undefined' && trial && !trial.isPaid) { %>
+        <a href="/#pricing" class="trial-pill <%= trial.isExpired ? 'expired' : '' %>">
+          <%= trial.isExpired ? 'Trial ended — upgrade' : trial.daysRemaining + 'd trial left' %>
+        </a>
+      <% } %>
+      <span class="app-user-name"><%= user.name || user.email %></span>
+      <form method="post" action="/api/auth/logout" class="app-signout-form">
+        <button type="submit" class="app-signout">Sign out</button>
+      </form>
+    </div>
+  </div>
+</header>

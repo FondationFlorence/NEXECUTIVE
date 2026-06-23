@@ -79,6 +79,15 @@ async function runCoreMigrations(client) {
     )
   `);
 
+  // Trial fields used by the signup flow + email automation.
+  // Added via ALTER so existing databases pick them up too (CREATE IF NOT
+  // EXISTS above will not add columns to an already-existing users table).
+  await client.query(`
+    ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS trial_start_date    TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS email_sequence_sent INTEGER NOT NULL DEFAULT 0
+  `);
+
   // Unique constraint on email (required for UPSERT)
   await client.query(`
     CREATE UNIQUE INDEX IF NOT EXISTS users_email_unique_idx ON users (LOWER(email))

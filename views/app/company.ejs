@@ -1,0 +1,120 @@
+<%- include('../partials/app-head', { title: company.name + ' — Nexecutive' }) %>
+<%- include('../partials/app-nav') %>
+
+<main class="app-shell">
+  <p class="page-sub" style="margin-bottom:1rem;"><a href="/targets" class="panel-link">← Targets</a></p>
+
+  <div class="company-head">
+    <div>
+      <p class="eyebrow"><%= company.sector %> · <%= company.hq_city ? company.hq_city + ', ' : '' %><%= company.country %></p>
+      <h1 class="page-title"><%= company.name %></h1>
+      <p class="page-sub" style="max-width:60ch;"><%= company.description || '' %></p>
+      <div style="margin-top:0.9rem;">
+        <span class="score score-<%= score.band.toLowerCase() %>"><b><%= score.total %></b>/100 · <%= score.band %></span>
+      </div>
+    </div>
+    <div class="company-actions">
+      <% if (watched) { %>
+        <form method="post" action="/app/watchlist/remove" class="inline-form">
+          <input type="hidden" name="company_id" value="<%= company.id %>">
+          <input type="hidden" name="return_to" value="/company/<%= company.slug %>">
+          <button class="btn btn-ghost">Watching ✓</button>
+        </form>
+      <% } else { %>
+        <form method="post" action="/app/watchlist/add" class="inline-form">
+          <input type="hidden" name="company_id" value="<%= company.id %>">
+          <input type="hidden" name="return_to" value="/company/<%= company.slug %>">
+          <button class="btn">+ Watch</button>
+        </form>
+      <% } %>
+      <% if (inPipeline) { %>
+        <a href="/pipeline" class="btn btn-ghost">In pipeline →</a>
+      <% } else { %>
+        <form method="post" action="/app/pipeline/add" class="inline-form">
+          <input type="hidden" name="company_id" value="<%= company.id %>">
+          <input type="hidden" name="return_to" value="/company/<%= company.slug %>">
+          <button class="btn">+ Pipeline</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+
+  <section class="panel" style="margin-bottom:1.25rem;">
+    <div class="facts">
+      <div><div class="fact-label">Revenue</div><div class="fact-value"><%= fmt.eur(company.revenue_eur) %></div></div>
+      <div><div class="fact-label">ARR</div><div class="fact-value"><%= fmt.eur(company.arr_eur) %></div></div>
+      <div><div class="fact-label">Growth</div><div class="fact-value"><%= company.growth_rate != null ? company.growth_rate + '% YoY' : '—' %></div></div>
+      <div><div class="fact-label">Employees</div><div class="fact-value"><%= fmt.num(company.employees) %></div></div>
+      <div><div class="fact-label">Valuation</div><div class="fact-value"><%= fmt.eur(company.valuation_eur) %></div></div>
+      <div><div class="fact-label">Funding stage</div><div class="fact-value"><%= company.funding_stage || '—' %></div></div>
+      <div><div class="fact-label">Ownership</div><div class="fact-value"><%= fmt.title(company.ownership) %></div></div>
+      <div><div class="fact-label">Founded</div><div class="fact-value"><%= company.founded_year || '—' %></div></div>
+      <div><div class="fact-label">Sector heat</div><div class="fact-value"><%= company.sector_heat %>/100</div></div>
+    </div>
+  </section>
+
+  <div class="grid grid-2">
+    <div class="grid">
+      <!-- Score breakdown -->
+      <section class="panel">
+        <div class="panel-head"><span class="panel-title">Fit score breakdown</span><span class="score score-<%= score.band.toLowerCase() %>"><b><%= score.total %></b>/100</span></div>
+        <div class="score-bars">
+          <% score.components.forEach(function(c){ %>
+            <div class="score-bar-row">
+              <div class="score-bar-label"><%= c.label %><div class="score-bar-note"><%= c.note %></div></div>
+              <div class="score-bar-track"><div class="score-bar-fill" style="width: <%= Math.round((c.score / c.max) * 100) %>%"></div></div>
+              <div class="score-bar-val"><%= c.score %>/<%= c.max %></div>
+            </div>
+          <% }) %>
+        </div>
+      </section>
+
+      <!-- Deal brief -->
+      <section class="panel" id="brief">
+        <div class="panel-head">
+          <span class="panel-title">Deal brief</span>
+          <form method="post" action="/app/briefs/generate" class="inline-form">
+            <input type="hidden" name="company_id" value="<%= company.id %>">
+            <button class="btn btn-sm <%= brief ? '' : 'btn-gold' %>"><%= brief ? 'Regenerate' : 'Generate brief' %></button>
+          </form>
+        </div>
+        <% if (brief) { %>
+          <div class="brief"><%- fmt.mdLite(brief.content) %></div>
+          <div class="brief-meta">Generated <%= fmt.timeAgo(brief.created_at) %> · model: <%= brief.model %></div>
+        <% } else { %>
+          <div class="empty">
+            <h3>No brief yet</h3>
+            <p>Generate an executive-ready briefing from this target's fundamentals and live signals.</p>
+          </div>
+        <% } %>
+      </section>
+    </div>
+
+    <!-- Signals -->
+    <section class="panel">
+      <div class="panel-head"><span class="panel-title">Signals (<%= signals.length %>)</span></div>
+      <% if (signals.length === 0) { %>
+        <p class="page-sub">No signals detected in the monitoring window.</p>
+      <% } else { %>
+        <% signals.forEach(function(a){ %>
+          <div class="alert-item">
+            <div class="alert-rail <%= fmt.sev(a.severity) %>"></div>
+            <div class="alert-body">
+              <div class="alert-title"><%= a.title %></div>
+              <% if (a.detail) { %><div class="alert-detail"><%= a.detail %></div><% } %>
+              <div class="alert-foot">
+                <span class="sev-chip <%= fmt.sev(a.severity) %>"><%= a.severity %></span>
+                <span class="reg-chip"><%= fmt.title(a.type) %></span>
+                <% if (a.regulator) { %><span class="reg-chip"><%= a.regulator %></span><% } %>
+                <% if (a.source) { %><span><%= a.source %></span><% } %>
+                <span><%= fmt.timeAgo(a.signal_date) %></span>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </section>
+  </div>
+</main>
+</body>
+</html>
