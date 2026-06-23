@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Start Your Free Trial — Nexecutive</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/theme.css">
+  <style>
+    body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .auth-page { position: relative; z-index: 1; width: 100%; max-width: 420px; }
+    .auth-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 2.5rem 2rem;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    .auth-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+      color: var(--text-primary);
+      margin-bottom: 0.35rem;
+    }
+    .auth-tagline {
+      font-size: 0.72rem;
+      color: var(--gold-dim);
+      letter-spacing: 0.08em;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 2rem;
+    }
+    .auth-headline {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--text-primary);
+      margin-bottom: 0.4rem;
+    }
+    .auth-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 300;
+      margin-bottom: 2rem;
+    }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.15s ease;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--gold); }
+    .form-input::placeholder { color: var(--text-muted); }
+    .form-error {
+      font-size: 0.8rem;
+      color: #f87171;
+      margin-top: 0.4rem;
+      display: none;
+    }
+    .form-error.visible { display: block; }
+    .auth-submit {
+      width: 100%;
+      padding: 0.85rem 1.5rem;
+      background: var(--gold);
+      color: var(--navy-deep);
+      border: none;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, box-shadow 0.15s ease;
+      letter-spacing: 0.02em;
+      margin-top: 0.5rem;
+    }
+    .auth-submit:hover {
+      background: var(--gold-bright);
+      box-shadow: 0 0 20px rgba(201, 168, 76, 0.25);
+    }
+    .auth-footer {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .auth-footer a { color: var(--gold); text-decoration: none; font-weight: 500; }
+    .auth-footer a:hover { color: var(--gold-bright); }
+    .trial-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(201, 168, 76, 0.1);
+      border: 1px solid rgba(201, 168, 76, 0.2);
+      border-radius: 20px;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.7rem;
+      color: var(--gold);
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo">Nexecutive</div>
+      <div class="auth-tagline">M&A Intelligence — Autonomous</div>
+
+      <div class="trial-badge">&#10003; 14-day free trial — no credit card</div>
+
+      <h1 class="auth-headline">Start your free trial</h1>
+      <p class="auth-sub">Full access for 14 days. No charge until you subscribe.</p>
+
+      <form id="signup-form" method="post" action="/api/auth/signup">
+        <div class="form-group">
+          <label class="form-label" for="name">Full Name</label>
+          <input class="form-input" type="text" id="name" name="name" placeholder="Alexandra Chen" autocomplete="name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Work Email</label>
+          <input class="form-input" type="email" id="email" name="email" placeholder="alex@firm.com" autocomplete="email" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-input" type="password" id="password" name="password" placeholder="Minimum 8 characters" minlength="8" required>
+          <p class="form-error" id="password-error"></p>
+        </div>
+        <p class="form-error" id="form-error"></p>
+        <button class="auth-submit" type="submit">Start Free Trial</button>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a href="/login">Sign in</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('signup-form');
+    const formError = document.getElementById('form-error');
+    const passwordError = document.getElementById('password-error');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      formError.classList.remove('visible');
+      passwordError.classList.remove('visible');
+
+      const data = {
+        name: form.name.value,
+        email: form.email.value,
+        password: form.password.value,
+      };
+
+      if (data.password.length < 8) {
+        passwordError.textContent = 'Password must be at least 8 characters';
+        passwordError.classList.add('visible');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+          redirect: 'manual',
+        });
+
+        if (res.status === 201) {
+          window.location.href = '/dashboard';
+        } else {
+          const body = await res.json().catch(() => ({}));
+          formError.textContent = body.error || 'Signup failed. Please try again.';
+          formError.classList.add('visible');
+        }
+      } catch (err) {
+        formError.textContent = 'Network error. Please check your connection and try again.';
+        formError.classList.add('visible');
+      }
+    });
+  </script>
+</body>
+</html>
