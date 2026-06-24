@@ -62,8 +62,8 @@ function postmarkRequest(payload) {
 /** Build email body for a given day. */
 function buildBody(day, user, trialEndDate) {
   const end = trialEndDate ? new Date(trialEndDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
-  const appUrl = 'https://nexecutive.polsia.app';
-  const pricingUrl = 'https://nexecutive.polsia.app#pricing';
+  const appUrl = 'https://nexecutive.com';
+  const pricingUrl = 'https://nexecutive.com#pricing';
 
   const vars = { name: user.name || '', trial_end_date: end, app_url: appUrl, pricing_url: pricingUrl };
 
@@ -104,9 +104,9 @@ Your Nexecutive trial ends tomorrow.
 Your data, alerts, and search history are saved — but access stops unless you subscribe. No credit card will be charged automatically.
 
 Choose your plan:
-• Solo — €149/mo
-• Team — €349/mo
-• Enterprise — €799/mo
+• Searcher — €299/mo
+• Sponsor — €999/mo
+• Firm — from €1,800/mo (sales-assisted)
 
 Subscribe now → ${vars.pricing_url}
 
@@ -171,8 +171,8 @@ async function sendTrialEmail(user, dayNum) {
 // --- Behavioral nurture ----------------------------------------------------
 // Replaces the fixed-day cadence: branch on what the user actually did.
 
-const APP_URL = 'https://nexecutive.polsia.app';
-const PRICING_URL = 'https://nexecutive.polsia.app#pricing';
+const APP_URL = 'https://nexecutive.com';
+const PRICING_URL = 'https://nexecutive.com#pricing';
 
 const BEHAVIORAL = {
   activated: { subject: 'You found live targets — here’s the case to keep going', stream: 'nurture-activated' },

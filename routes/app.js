@@ -30,6 +30,7 @@ const { scoreCompany } = require('../services/scoring');
 const { generateBrief } = require('../services/briefs');
 const { matchThesis, normalizeThesisForm } = require('../services/thesis');
 const { seedFromThesis } = require('../services/onboarding');
+const { getContacts } = require('../services/enrichment');
 
 router.use(requireAuth);
 
@@ -181,9 +182,10 @@ router.get('/company/:slug', async (req, res, next) => {
     const signals = await alerts.forCompany(company.id, 50);
     const score = scoreCompany(company, { signals });
     const brief = await briefs.latestForCompany(req.user.id, company.id);
+    const contacts = await getContacts(company);
     res.render('app/company', {
       nav: 'targets', user: req.user, trial: trialInfo(req.user),
-      company, signals, score, brief,
+      company, signals, score, brief, contacts,
       watched: await watchlist.isWatched(req.user.id, company.id),
       inPipeline: await pipeline.isInPipeline(req.user.id, company.id),
     });
@@ -217,7 +219,8 @@ router.post('/app/briefs/generate', async (req, res, next) => {
     if (!company) return res.redirect(303, '/targets');
     const signals = await alerts.forCompany(company.id, 50);
     const score = scoreCompany(company, { signals });
-    const { content, model } = await generateBrief(company, signals, score);
+    const contacts = await getContacts(company);
+    const { content, model } = await generateBrief(company, signals, score, contacts);
     await briefs.create({ userId: req.user.id, companyId: company.id, content, model });
     await markActivated(req.user.id);
     res.redirect(303, `/company/${company.slug}#brief`);

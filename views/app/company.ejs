@@ -88,6 +88,31 @@
       </section>
     </div>
 
+    <div class="grid">
+    <section class="panel">
+      <div class="panel-head"><span class="panel-title">Key people</span></div>
+      <p class="page-sub" style="margin:-0.4rem 0 0.9rem;font-size:0.78rem;">Who to approach — identity &amp; role from registry officers; email, LinkedIn &amp; personal contact via enrichment.</p>
+      <% contacts.forEach(function(p){ %>
+        <div class="contact">
+          <div class="contact-id">
+            <span class="contact-name"><%= p.name %></span>
+            <% if (p.role) { %><span class="contact-role"><%= p.role %></span><% } %>
+          </div>
+          <div class="contact-lines">
+            <% if (p.email) { %><a class="contact-link" href="mailto:<%= p.email %>"><%= p.email %></a><% } %>
+            <% if (p.personal_email) { %><a class="contact-link" href="mailto:<%= p.personal_email %>">personal: <%= p.personal_email %></a><% } %>
+            <% if (p.phone) { %><span class="contact-link"><%= p.phone %></span><% } %>
+            <% if (p.linkedin_url) { %><a class="contact-link" href="<%= p.linkedin_url %>" target="_blank" rel="noopener">LinkedIn ↗</a><% } %>
+            <% if (!p.email && !p.personal_email && !p.linkedin_url) { %><span class="reg-chip">enrichment pending</span><% } %>
+          </div>
+          <div class="contact-foot">
+            <% if (p.confidence) { %><span class="sev-chip <%= p.confidence === 'high' ? 'medium' : 'low' %>" style="text-transform:none;"><%= p.confidence %></span><% } %>
+            <% if (p.source_url) { %><a class="src-link" href="<%= p.source_url %>" target="_blank" rel="noopener"><%= p.source || 'registry' %></a><% } else if (p.source) { %><span class="reg-chip"><%= p.source %></span><% } %>
+          </div>
+        </div>
+      <% }) %>
+    </section>
+
     <section class="panel">
       <div class="panel-head"><span class="panel-title">Signal trail (<%= signals.length %>)</span></div>
       <% if (signals.length === 0) { %>
@@ -112,6 +137,7 @@
         <% }) %>
       <% } %>
     </section>
+    </div>
   </div>
 </main>
 </body>

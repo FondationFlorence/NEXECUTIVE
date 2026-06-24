@@ -30,8 +30,10 @@ Express.js · EJS · PostgreSQL (Neon) · Render · optional OpenAI for briefs
 | `PORT` | no | Server port (default 3000) |
 | `OPENAI_API_KEY` | no | Enables narrative deal briefs (falls back to a template engine) |
 | `OPENAI_BRIEF_MODEL` | no | Brief model (default `gpt-4o-mini`) |
-| `POSTMARK_API_KEY` | no | Sends trial nurture emails |
-| `POLSIA_IN_PROCESS_CRONS_ENABLED` | no | Set `true` to allow cron jobs to run |
+| `POSTMARK_API_KEY` | no | Sends trial nurture emails (Tue/Thu only) |
+| `EMAIL_DRY_RUN` | no | Log emails instead of sending |
+| `CONTACT_ENRICH_PROVIDER` | no | Enables contact enrichment (LinkedIn / personal email / phone) via a pluggable provider |
+| `CRONS_ENABLED` | no | Set `true` to allow cron jobs to run |
 
 ## Local development
 
@@ -70,13 +72,24 @@ shortlist immediately (the aha lands before the trial clock matters).
 Every signal and brief links to its primary source — registries for ownership/succession,
 CFNEWS for deal activity.
 
-## Scheduled jobs (`polsia.toml`)
+## Key contacts
 
-- `jobs/trial-email-scheduler.js` — daily, **behavioral** nurture: activated → upgrade case,
-  dormant → a sourced example brief built from their thesis. `EMAIL_DRY_RUN=true` logs instead of sending.
+Each target carries the people to approach (owner / MD / FD). Identity and role come from
+the registry officers; `email` is an inferred business pattern; `linkedin_url`,
+`personal_email`, and `phone` are enrichment fields filled by a pluggable provider —
+wire one in via `services/enrichment.js` + `CONTACT_ENRICH_PROVIDER`. Contacts appear on
+the company page and in every deal brief. (Personal contact data on real individuals needs
+a lawful basis — legitimate interest for B2B — and erasure handling.)
+
+## Scheduled jobs (cron manifest)
+
+- `jobs/trial-email-scheduler.js` — **behavioral** nurture: activated → upgrade case,
+  dormant → a sourced example brief from their thesis. Emails go out **Tuesdays and Thursdays only**.
+  `EMAIL_DRY_RUN=true` logs instead of sending (and bypasses the day gate for testing).
 - `jobs/signal-monitor.js` — every 6h, emits fresh **sourced** signals across the universe.
 
-Both are gated by `POLSIA_IN_PROCESS_CRONS_ENABLED=true`.
+Both are gated by `CRONS_ENABLED=true`. (The cron schedule lives in the hosting platform's
+manifest; jobs are plain `node` scripts.)
 
 ## Layout
 

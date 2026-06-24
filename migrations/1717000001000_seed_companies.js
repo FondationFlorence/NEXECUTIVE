@@ -132,6 +132,33 @@ const A = {
   ],
 };
 
+// slug -> [name, role, email, linkedin, personal_email, confidence]
+// Identity/role come from the registry officers (high confidence); work email
+// is an inferred pattern; personal_email is left null for downstream enrichment.
+const CONTACTS = {
+  'froid-atlantique': [['Jean-Marc Brèthes', 'Gérant & Owner', 'jm.brethes@froid-atlantique.eu', 'https://www.linkedin.com/in/jean-marc-brethes', null, 'high']],
+  'clermont-usinage': [['Bernard Faure', 'Président (Founder)', 'b.faure@clermont-usinage.eu', 'https://www.linkedin.com/in/bernard-faure-usinage', null, 'high']],
+  'proprenet-services': [['Sylvie Marchand', 'Gérante', 's.marchand@proprenet.eu', 'https://www.linkedin.com/in/sylvie-marchand-services', null, 'high']],
+  'penmoor-elevators': [
+    ['Geoffrey Pemberton', 'Managing Director & Owner', 'g.pemberton@penmoor.co.uk', 'https://www.linkedin.com/in/geoffrey-pemberton', null, 'high'],
+    ['Alan Whitcombe', 'Finance Director', 'a.whitcombe@penmoor.co.uk', 'https://www.linkedin.com/in/alan-whitcombe', null, 'medium'],
+  ],
+  'aldgate-testing': [['Priya Nair', 'Founder & MD', 'p.nair@aldgate-testing.co.uk', 'https://www.linkedin.com/in/priya-nair-ndt', null, 'high']],
+  'northfield-msp': [['Daniel Okafor', 'Founder & MD', 'd.okafor@northfield-it.co.uk', 'https://www.linkedin.com/in/daniel-okafor-msp', null, 'high']],
+  'brackley-vet': [['Margaret Ellison', 'Senior Partner & Owner', 'm.ellison@brackleyvet.co.uk', 'https://www.linkedin.com/in/margaret-ellison-dvm', null, 'high']],
+  'severn-packaging': [
+    ['Roy Hartley', 'Chairman & Owner', 'r.hartley@severn-packaging.co.uk', 'https://www.linkedin.com/in/roy-hartley-packaging', null, 'high'],
+    ['Karen Liddell', 'Finance Director', 'k.liddell@severn-packaging.co.uk', 'https://www.linkedin.com/in/karen-liddell', null, 'medium'],
+  ],
+  'rheinluft-klima': [['Klaus Hofmann', 'Geschäftsführer (Owner)', 'k.hofmann@rheinluft.de', 'https://www.linkedin.com/in/klaus-hofmann-klima', null, 'high']],
+  'saarmetall-werk': [['Dieter Vogel', 'Geschäftsführender Gesellschafter', 'd.vogel@saarmetall.de', 'https://www.linkedin.com/in/dieter-vogel-saar', null, 'high']],
+  'elbe-aufzug': [['Heinz Brandt', 'Inhaber & Geschäftsführer', 'h.brandt@elbe-aufzug.de', 'https://www.linkedin.com/in/heinz-brandt', null, 'high']],
+  'alpin-gebaeude': [['Andreas Gruber', 'Geschäftsführer (Owner)', 'a.gruber@alpin-gt.at', 'https://www.linkedin.com/in/andreas-gruber-gt', null, 'high']],
+  'steirer-logistik': [['Franz Steiner', 'Eigentümer & GF', 'f.steiner@steirer-logistik.at', 'https://www.linkedin.com/in/franz-steiner-log', null, 'high']],
+  'delft-aandrijf': [['Pieter van Dijk', 'Eigenaar / Directeur', 'p.vandijk@delft-aandrijf.nl', 'https://www.linkedin.com/in/pieter-van-dijk-drive', null, 'high']],
+  'shannon-coldchain': [['Connor Walsh', 'Founder & MD', 'c.walsh@shannoncoldchain.ie', 'https://www.linkedin.com/in/connor-walsh-coldchain', null, 'high']],
+};
+
 function registryUrlFor(country, ref) {
   const reg = REGISTRY[country];
   if (!reg) return { registry: null, url: null };
@@ -172,12 +199,25 @@ async function insertAlerts(client, companyId, alerts) {
   }
 }
 
+async function insertContacts(client, companyId, list) {
+  const r = await client.query(`SELECT registry, registry_url FROM companies WHERE id = $1`, [companyId]);
+  const reg = r.rows[0] || {};
+  for (const [name, role, email, linkedin, personal, confidence] of list) {
+    await client.query(
+      `INSERT INTO contacts (company_id, name, role, email, linkedin_url, personal_email, source, source_url, confidence)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+      [companyId, name, role, email, linkedin, personal, reg.registry || null, reg.registry_url || null, confidence],
+    );
+  }
+}
+
 module.exports = {
   name: 'seed_companies',
   up: async (client) => {
     for (const row of C) {
       const id = await insertCompany(client, row);
       if (id && A[row[0]]) await insertAlerts(client, id, A[row[0]]);
+      if (id && CONTACTS[row[0]]) await insertContacts(client, id, CONTACTS[row[0]]);
     }
   },
 };

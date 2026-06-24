@@ -9,8 +9,8 @@
  *       → a sourced example brief built from their thesis, value up front
  *
  * Run via:        node jobs/trial-email-scheduler.js
- * Scheduled via:  polsia.toml [[crons]]  (daily)
- * Runtime guard:  POLSIA_IN_PROCESS_CRONS_ENABLED (set true to enable)
+ * Scheduled via:  the cron manifest  (daily)
+ * Runtime guard:  CRONS_ENABLED (set true to enable)
  * Dry run:        EMAIL_DRY_RUN=true logs instead of sending
  */
 const { pool } = require('../db/index');
@@ -23,8 +23,16 @@ const theses = require('../db/theses');
 const { buildShortlist } = require('../services/onboarding');
 const { sendBehavioralEmail } = require('../services/email');
 
-if (process.env.POLSIA_IN_PROCESS_CRONS_ENABLED !== 'true' && process.env.EMAIL_DRY_RUN !== 'true') {
-  console.log('[trial-nurture] Disabled (POLSIA_IN_PROCESS_CRONS_ENABLED !== true)');
+if (process.env.CRONS_ENABLED !== 'true' && process.env.EMAIL_DRY_RUN !== 'true') {
+  console.log('[trial-nurture] Disabled (CRONS_ENABLED !== true)');
+  process.exit(0);
+}
+
+// Emails only ever leave on Tuesdays and Thursdays (UTC). Never any other day.
+// The cron can run daily; on other days this is a no-op. (Dry-run bypasses.)
+const SEND_DAYS = [2, 4]; // 0=Sun … 2=Tue, 4=Thu
+if (!SEND_DAYS.includes(new Date().getUTCDay()) && process.env.EMAIL_DRY_RUN !== 'true') {
+  console.log('[trial-nurture] Skipped — sends only on Tue/Thu (UTC)');
   process.exit(0);
 }
 

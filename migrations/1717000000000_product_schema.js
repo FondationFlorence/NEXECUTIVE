@@ -130,5 +130,27 @@ module.exports = {
         updated_at TIMESTAMPTZ DEFAULT NOW()
       )
     `);
+
+    // --- Key people / contacts per company -----------------------------
+    // Decision-makers to approach. name/role/email come from the registry
+    // officers; linkedin_url / personal_email / phone are enrichment fields
+    // populated by a pluggable provider (see services/enrichment.js).
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS contacts (
+        id             SERIAL PRIMARY KEY,
+        company_id     INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+        name           VARCHAR(160) NOT NULL,
+        role           VARCHAR(120),
+        email          VARCHAR(200),
+        linkedin_url   TEXT,
+        personal_email VARCHAR(200),
+        phone          VARCHAR(60),
+        source         VARCHAR(120),
+        source_url     TEXT,
+        confidence     VARCHAR(20),
+        created_at     TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    await client.query(`CREATE INDEX IF NOT EXISTS contacts_company_idx ON contacts (company_id)`);
   },
 };

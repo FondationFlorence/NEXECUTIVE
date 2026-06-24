@@ -9,14 +9,14 @@
  * the verifiability contract stay the same.
  *
  * Run via:        node jobs/signal-monitor.js
- * Scheduled via:  polsia.toml [[crons]]
- * Runtime guard:  POLSIA_IN_PROCESS_CRONS_ENABLED (set true to enable)
+ * Scheduled via:  the cron manifest
+ * Runtime guard:  CRONS_ENABLED (set true to enable)
  */
 const { pool } = require('../db/index');
 const { create } = require('../db/alerts');
 
-if (process.env.POLSIA_IN_PROCESS_CRONS_ENABLED !== 'true') {
-  console.log('[signal-monitor] Disabled (POLSIA_IN_PROCESS_CRONS_ENABLED !== true)');
+if (process.env.CRONS_ENABLED !== 'true') {
+  console.log('[signal-monitor] Disabled (CRONS_ENABLED !== true)');
   process.exit(0);
 }
 

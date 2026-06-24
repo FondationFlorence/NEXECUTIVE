@@ -18,13 +18,13 @@
 4. Track targets through a pipeline: sourced → screening → diligence → term sheet → close.
 
 ## Pricing
-- Searcher — €149/month (€1,488/year)
-- Fund — €349/month (€3,492/year)
-- Sponsor — €799/month (€7,992/year)
-- All plans include a 14-day free trial. No credit card required.
+- Searcher — €299/month (€2,990/year)
+- Sponsor — €999/month (€9,990/year)
+- Firm — from €1,800/month (sales-assisted, custom contract)
+- Searcher and Sponsor are self-serve with a 14-day free trial. No credit card required.
 
 ## Links
-- Home: https://nexecutive.polsia.app/
-- Pricing & FAQ: https://nexecutive.polsia.app/#pricing
-- Start free: https://nexecutive.polsia.app/signup
+- Home: https://nexecutive.com/
+- Pricing & FAQ: https://nexecutive.com/#pricing
+- Start free: https://nexecutive.com/signup
 - Contact: hello@nexecutive.com

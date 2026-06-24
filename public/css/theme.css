@@ -1,30 +1,52 @@
 /* ===== FONTS ===== */
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Hanken+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-/* ===== DESIGN TOKENS ===== */
+/* ===== DESIGN TOKENS — Nexecutive brand (light / royal blue / Spectral) ===== */
 :root {
-  --navy-deep: #0a0f1e;
-  --navy-base: #0d1424;
-  --navy-card: #111929;
-  --navy-card-hover: #162035;
-  --navy-border: rgba(201, 168, 76, 0.12);
-  --navy-border-hover: rgba(201, 168, 76, 0.3);
+  /* Brand palette (from the brand charter) */
+  --ink: #0C1622;
+  --ink2: #13233A;
+  --ink3: #1E3252;
+  --paper: #F6F4EF;
+  --paper2: #FFFFFF;
+  --tx: #14202E;
+  --mut: #5A6675;
+  --faint: #8C95A3;
+  --line: rgba(12, 22, 34, .10);
+  --line2: rgba(12, 22, 34, .07);
+  --accent: #2756C9;
+  --accent2: #1E47AE;
+  --soft: #EAEFFB;
+  --signal: #2E8B6B;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow-card: 0 24px 60px -28px rgba(12,22,34,.34), 0 2px 8px rgba(12,22,34,.04);
+  --shadow-soft: 0 1px 2px rgba(12,22,34,.10);
 
-  --gold: #c9a84c;
-  --gold-bright: #d9b84e;
-  --gold-dim: #8b7234;
-  --gold-glow: rgba(201, 168, 76, 0.15);
+  /* Compatibility aliases — re-skin the existing token-driven CSS to the
+     new light brand without touching every component rule or inline style. */
+  --navy-deep: var(--paper);
+  --navy-base: var(--paper);
+  --navy-card: var(--paper2);
+  --navy-card-hover: var(--soft);
+  --navy-border: var(--line);
+  --navy-border-hover: rgba(39, 86, 201, .35);
 
-  --steel-blue: #4a6080;
-  --steel-light: #6b82a0;
+  --gold: var(--accent);
+  --gold-bright: var(--accent2);
+  --gold-dim: var(--mut);
+  --gold-glow: var(--soft);
 
-  --text-primary: #e8e8e8;
-  --text-secondary: rgba(232, 232, 232, 0.6);
-  --text-muted: rgba(232, 232, 232, 0.38);
+  --steel-blue: var(--mut);
+  --steel-light: var(--faint);
 
-  --grid-color: rgba(201, 168, 76, 0.03);
-  --glass-bg: rgba(17, 25, 41, 0.6);
-  --glass-border: rgba(201, 168, 76, 0.15);
+  --text-primary: var(--ink);
+  --text-secondary: var(--mut);
+  --text-muted: var(--faint);
+
+  --grid-color: rgba(12, 22, 34, .03);
+  --glass-bg: var(--paper2);
+  --glass-border: var(--line);
 }
 
 /* ===== RESET & BASE ===== */
@@ -36,7 +58,7 @@ html {
 }
 
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Hanken Grotesk', system-ui, sans-serif;
   background: var(--navy-deep);
   color: var(--text-primary);
   line-height: 1.6;
@@ -65,13 +87,13 @@ body::before {
 
 /* ===== TYPOGRAPHY ===== */
 h1, h2, h3, h4 {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Spectral', serif;
   line-height: 1.1;
   font-weight: 400;
 }
 
 .section-label {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Hanken Grotesk', system-ui, sans-serif;
   font-size: 0.7rem;
   font-weight: 500;
   letter-spacing: 0.14em;
@@ -109,7 +131,7 @@ h1, h2, h3, h4 {
 }
 
 .nav-logo {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Spectral', serif;
   font-size: 1.05rem;
   color: var(--text-primary);
   letter-spacing: -0.02em;
@@ -119,7 +141,7 @@ h1, h2, h3, h4 {
   font-size: 0.7rem;
   color: var(--gold-dim);
   letter-spacing: 0.08em;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 /* ===== HERO ===== */
@@ -138,7 +160,7 @@ h1, h2, h3, h4 {
   top: 15%; right: 8%;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(201, 168, 76, 0.04) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(39, 86, 201, 0.04) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -161,7 +183,7 @@ h1, h2, h3, h4 {
   color: var(--gold);
   margin-bottom: 1.5rem;
   font-weight: 500;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 .hero-headline {
@@ -204,7 +226,7 @@ h1, h2, h3, h4 {
 
 .hero-cta-primary:hover {
   background: var(--gold-bright);
-  box-shadow: 0 0 24px rgba(201, 168, 76, 0.3);
+  box-shadow: 0 0 24px rgba(39, 86, 201, 0.3);
 }
 
 .hero-cta-secondary {
@@ -236,7 +258,7 @@ h1, h2, h3, h4 {
   width: 100%;
   max-width: 440px;
   backdrop-filter: blur(24px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(201, 168, 76, 0.08);
+  box-shadow: 0 8px 32px rgba(12, 22, 34, 0.12), inset 0 1px 0 rgba(39, 86, 201, 0.08);
 }
 
 .card-header {
@@ -249,7 +271,7 @@ h1, h2, h3, h4 {
 }
 
 .card-label {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 0.6rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -258,7 +280,7 @@ h1, h2, h3, h4 {
 }
 
 .card-status {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 0.6rem;
   color: var(--text-muted);
 }
@@ -276,7 +298,7 @@ h1, h2, h3, h4 {
   padding: 0.85rem 1rem;
   background: rgba(13, 20, 36, 0.7);
   border-radius: 6px;
-  border-left: 2px solid rgba(201, 168, 76, 0.25);
+  border-left: 2px solid rgba(39, 86, 201, 0.25);
   backdrop-filter: blur(8px);
   transition: border-color 0.2s ease, background 0.2s ease;
 }
@@ -288,11 +310,11 @@ h1, h2, h3, h4 {
 
 .stream-item.highlight {
   border-left-color: var(--gold);
-  background: rgba(201, 168, 76, 0.05);
+  background: rgba(39, 86, 201, 0.05);
 }
 
 .stream-ticker {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 0.58rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -325,8 +347,8 @@ h1, h2, h3, h4 {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 6px #22c55e;
+  background: #2E8B6B;
+  box-shadow: 0 0 6px #2E8B6B;
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -336,7 +358,7 @@ h1, h2, h3, h4 {
 }
 
 .live-text {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 0.65rem;
   color: var(--text-muted);
 }
@@ -384,7 +406,7 @@ h1, h2, h3, h4 {
 }
 
 .problem-stat {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Spectral', serif;
   font-size: 2.4rem;
   font-weight: 400;
   color: var(--gold);
@@ -403,7 +425,7 @@ h1, h2, h3, h4 {
 }
 
 .problem-conclusion p {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Spectral', serif;
   font-size: 1.15rem;
   font-style: italic;
   color: var(--text-secondary);
@@ -445,7 +467,7 @@ h1, h2, h3, h4 {
   color: var(--navy-deep);
   padding: 0.9rem 1.2rem;
   border-radius: 50%;
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Spectral', serif;
   font-size: 0.85rem;
   font-weight: 400;
   white-space: nowrap;
@@ -458,7 +480,7 @@ h1, h2, h3, h4 {
   transform: translate(-50%, -50%);
   width: 260px;
   height: 260px;
-  border: 1px dashed rgba(201, 168, 76, 0.2);
+  border: 1px dashed rgba(39, 86, 201, 0.2);
   border-radius: 50%;
 }
 
@@ -478,7 +500,7 @@ h1, h2, h3, h4 {
 
 .node-label {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 0.65rem;
   font-weight: 500;
   color: var(--gold);
@@ -535,19 +557,19 @@ h1, h2, h3, h4 {
   padding: 2rem;
   backdrop-filter: blur(16px);
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(12, 22, 34, 0.10);
 }
 
 .feature-card:hover {
   border-color: var(--navy-border-hover);
   background: rgba(22, 32, 53, 0.8);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(201, 168, 76, 0.1);
+  box-shadow: 0 8px 32px rgba(12, 22, 34, 0.12), 0 0 0 1px rgba(39, 86, 201, 0.1);
 }
 
 .feature-icon { margin-bottom: 1.25rem; }
 
 .feature-title {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Spectral', serif;
   font-size: 1.15rem;
   font-weight: 400;
   color: var(--text-primary);
@@ -601,7 +623,7 @@ h1, h2, h3, h4 {
 }
 
 .outcome-value {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Spectral', serif;
   font-size: 2.2rem;
   font-weight: 400;
   color: var(--gold);
@@ -631,7 +653,7 @@ h1, h2, h3, h4 {
   right: -5%;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(201, 168, 76, 0.04) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(39, 86, 201, 0.04) 0%, transparent 65%);
   pointer-events: none;
 }
 
@@ -679,7 +701,7 @@ h1, h2, h3, h4 {
 }
 
 .accent-number {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Spectral', serif;
   font-size: 2.6rem;
   font-weight: 400;
   color: var(--gold);
@@ -687,7 +709,7 @@ h1, h2, h3, h4 {
 }
 
 .accent-label {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 0.7rem;
   color: var(--text-muted);
   letter-spacing: 0.05em;
@@ -712,7 +734,7 @@ h1, h2, h3, h4 {
 }
 
 .pricing-headline {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Spectral', serif;
   font-size: clamp(1.8rem, 3vw, 2.6rem);
   font-weight: 400;
   font-style: italic;
@@ -806,22 +828,22 @@ h1, h2, h3, h4 {
   gap: 0;
   position: relative;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(12, 22, 34, 0.10);
 }
 
 .pricing-card:hover {
   border-color: var(--navy-border-hover);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(12, 22, 34, 0.12);
 }
 
 .card-featured {
   border-color: var(--gold);
   background: var(--navy-card);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(201, 168, 76, 0.2);
+  box-shadow: 0 8px 40px rgba(12, 22, 34, 0.14), 0 0 0 1px rgba(39, 86, 201, 0.2);
 }
 
 .card-featured:hover {
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(201, 168, 76, 0.4);
+  box-shadow: 0 12px 48px rgba(12, 22, 34, 0.16), 0 0 0 1px rgba(39, 86, 201, 0.4);
 }
 
 .card-popular-badge {
@@ -840,7 +862,7 @@ h1, h2, h3, h4 {
 }
 
 .card-tier {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 0.68rem;
   font-weight: 500;
   letter-spacing: 0.14em;
@@ -861,7 +883,7 @@ h1, h2, h3, h4 {
 }
 
 .price-currency {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Spectral', serif;
   font-size: 1.4rem;
   font-weight: 400;
   color: var(--text-primary);
@@ -870,7 +892,7 @@ h1, h2, h3, h4 {
 }
 
 .price-amount {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Spectral', serif;
   font-size: 2.6rem;
   font-weight: 400;
   color: var(--text-primary);
@@ -887,7 +909,7 @@ h1, h2, h3, h4 {
 .card-featured .price-amount { color: var(--text-primary); }
 
 .card-price-sub {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 0.7rem;
   color: var(--text-muted);
   margin-top: 0.4rem;
@@ -947,7 +969,7 @@ h1, h2, h3, h4 {
 .card-cta:hover {
   background: var(--gold-glow);
   border-color: var(--gold);
-  box-shadow: 0 0 16px rgba(201, 168, 76, 0.15);
+  box-shadow: 0 0 16px rgba(39, 86, 201, 0.15);
 }
 
 .card-cta-primary {
@@ -960,7 +982,7 @@ h1, h2, h3, h4 {
   background: var(--gold-bright);
   border-color: var(--gold-bright);
   color: var(--navy-deep);
-  box-shadow: 0 0 20px rgba(201, 168, 76, 0.25);
+  box-shadow: 0 0 20px rgba(39, 86, 201, 0.25);
 }
 
 /* ===== INCLUDES ===== */
@@ -1025,7 +1047,7 @@ h1, h2, h3, h4 {
 }
 
 .faq-headline {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Spectral', serif;
   font-size: clamp(1.6rem, 2.5vw, 2.2rem);
   font-weight: 400;
   font-style: italic;
@@ -1052,7 +1074,7 @@ h1, h2, h3, h4 {
 .faq-item:hover { background: rgba(17, 25, 41, 0.5); }
 
 .faq-q {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Hanken Grotesk', system-ui, sans-serif;
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--text-primary);
@@ -1130,7 +1152,7 @@ details[open] .faq-q::after { transform: rotate(45deg); }
 }
 
 .footer-logo {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Spectral', serif;
   font-size: 1rem;
   color: var(--text-primary);
 }

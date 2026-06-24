@@ -52,6 +52,7 @@ Express.js + EJS + Neon PostgreSQL + Render
 - `companies` — target universe; financials + ebitda_eur, owner_age, availability, registry, registry_url
 - `users` — accounts; trial_start_date, email_sequence_sent, activated_at, behavioral_email_sent
 - `theses` — per-user acquisition thesis (sectors[], countries[], rev_min/max, keywords)
+- `contacts` — key people per company (name, role, email, linkedin_url, personal_email, phone, source)
 - `watchlist` — the user's shortlist (cached fit_score)
 - `alerts` — signals per company (type, severity, source, **source_url**, regulator)
 - `deal_briefs` — generated sourced briefings
@@ -62,9 +63,11 @@ Express.js + EJS + Neon PostgreSQL + Render
 ## Environment variables
 - `DATABASE_URL` (required), `SESSION_SECRET` (required in production)
 - `OPENAI_API_KEY` (optional — enables narrative briefs), `OPENAI_BRIEF_MODEL` (default gpt-4o-mini)
-- `POSTMARK_API_KEY` (nurture emails), `EMAIL_DRY_RUN` (log instead of send), `POLSIA_IN_PROCESS_CRONS_ENABLED` (gate cron jobs)
+- `POSTMARK_API_KEY` (nurture emails, Tue/Thu only), `EMAIL_DRY_RUN` (log instead of send), `CRONS_ENABLED` (gate cron jobs)
+- `CONTACT_ENRICH_PROVIDER` (optional — enables contact enrichment via a pluggable provider)
 
 ## Recent changes
+- 2026-06-24 — Brand + pricing + contacts pass. New visual identity (brand charter): light theme, royal blue #2756C9, Spectral/Hanken Grotesk/IBM Plex Mono, logo assets in public/brand/ (favicon = monogram); theme.css re-skinned via token swap. Pricing re-architected to Searcher €299 / Sponsor €999 / Firm from €1,800 (sales-assisted). Behavioral emails now send Tue/Thu only. Deal briefs + company pages now list key contacts (name, role, email, LinkedIn, personal email) via contacts table + services/enrichment.js (pluggable provider, GDPR-aware). Removed all Polsia notions from app code (analytics beacon, polsia.app domain → nexecutive.com, POLSIA_* env → CRONS_ENABLED, footer credit); the cron manifest file remains the platform's scheduler config.
 - 2026-06-23 — Strategic pivot to one ICP (searcher/ETA/sponsor) with verifiability as the product. Every signal carries source + source_url (registries + CFNEWS); seed re-built for European lower-mid-market targets (FR/UK/DE/AT/NL/IE). New: thesis intake → instant shortlist (/onboarding, services/thesis.js, theses table). Scoring re-tuned around succession. Briefs cite sources. Behavioral email nurture (activated/dormant) replaces the fixed-day cadence; activation tracked. Removed Meta Pixel; added public/llms.txt for AEO. Pricing reframed (Searcher/Fund/Sponsor) + FAQ schema rewritten.
 - 2026-06-23 — Built the analysis product behind the landing page: target universe + screening engine (scoring.js), per-company detail with AI deal briefs (briefs.js, OpenAI + template fallback), watchlist, alerts feed, pipeline tracker, digest settings. New tables + seed. New router routes/app.js, autonomous jobs/signal-monitor.js.
 - 2026-06-23 — Fixes: added missing trial columns to migrations; corrected getUsersNeedingEmail (trial users have subscription_status='trial', not NULL); added GET /login and /signup pages; middleware/auth exports a callable function; replaced hardcoded SESSION_SECRET fallback (random in dev, required in prod); added urlencoded body parsing + error handler.
