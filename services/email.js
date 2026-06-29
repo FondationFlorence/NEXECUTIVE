@@ -1,5 +1,5 @@
 /**
- * Email service — sends Bildup transactional emails via Postmark REST API.
+ * Email service — sends BildUp transactional emails via Postmark REST API.
  * API key stored in POSTMARK_API_KEY env var (injected by platform).
  * Stream: 'trial-email' for tracking, tagged per email number.
  */
@@ -7,12 +7,12 @@ const https = require('https');
 
 const POSTMARK_BASE = 'api.postmarkapp.com';
 const FROM_EMAIL = 'hello@bildup.com';
-const FROM_NAME = 'Bildup';
+const FROM_NAME = 'BildUp';
 
 const TRIAL_EMAILS = {
   // body can include {{name}}, {{trial_end_date}}, {{app_url}}, {{pricing_url}}
   1: {
-    subject: 'Welcome to Bildup — here’s what to do first',
+    subject: 'Welcome to BildUp — here’s what to do first',
     stream: 'trial-welcome',
   },
   7: {
@@ -20,7 +20,7 @@ const TRIAL_EMAILS = {
     stream: 'trial-day7',
   },
   13: {
-    subject: 'Your Bildup trial ends tomorrow',
+    subject: 'Your BildUp trial ends tomorrow',
     stream: 'trial-day13',
   },
   15: {
@@ -71,9 +71,9 @@ function buildBody(day, user, trialEndDate) {
     return `
 Hi${vars.name ? ' ' + vars.name : ''},
 
-Your 14-day Bildup trial is live. You now have full access to monitor M&A targets and receive AI-generated deal briefings — at no cost.
+Your 14-day BildUp trial is live. You now have full access to monitor M&A targets and receive AI-generated deal briefings — at no cost.
 
-Start here: run your first search to see what Bildup surfaces for you right now.
+Start here: run your first search to see what BildUp surfaces for you right now.
 
 Run your first search → ${vars.app_url}
 
@@ -87,7 +87,7 @@ Hi${vars.name ? ' ' + vars.name : ''},
 
 7 days in — here's where you stand.
 
-Bildup has been monitoring M&A signals across your target list. If you haven't tried it yet, now's the moment: alerts can be set up in under 2 minutes and deliver straight to your inbox.
+BildUp has been monitoring M&A signals across your target list. If you haven't tried it yet, now's the moment: alerts can be set up in under 2 minutes and deliver straight to your inbox.
 
 7 days left in your trial. After that, your data and alerts are saved but access stops.
 
@@ -99,7 +99,7 @@ Unlock unlimited alerts — choose your plan → ${vars.pricing_url}
     return `
 Hi${vars.name ? ' ' + vars.name : ''},
 
-Your Bildup trial ends tomorrow.
+Your BildUp trial ends tomorrow.
 
 Your data, alerts, and search history are saved — but access stops unless you subscribe. No credit card will be charged automatically.
 
@@ -118,7 +118,7 @@ Need more time? Reply to this email — we'll extend it.
     return `
 Hi${vars.name ? ' ' + vars.name : ''},
 
-Your Bildup trial has ended.
+Your BildUp trial has ended.
 
 You can rejoin anytime — your data and alerts are still here when you're ready.
 
@@ -187,7 +187,7 @@ ${hi}
 
 You've put ${ctx.shortlistCount || 'several'} targets on your shortlist and started working them — that's exactly the point.
 
-Here's the case to keep going: a single proprietary, sourced lead that closes is worth orders of magnitude more than the subscription. Bildup keeps monitoring every target on your list and flags the next ownership, succession, or deal signal the moment it's filed — each one linked to the primary source so you can act with conviction.
+Here's the case to keep going: a single proprietary, sourced lead that closes is worth orders of magnitude more than the subscription. BildUp keeps monitoring every target on your list and flags the next ownership, succession, or deal signal the moment it's filed — each one linked to the primary source so you can act with conviction.
 
 Lock in your access before the trial ends → ${PRICING_URL}
 

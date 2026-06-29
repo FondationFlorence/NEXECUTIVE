@@ -1,7 +1,7 @@
 /**
  * Seed the monitored target universe + sourced M&A signals — FRANCE-FIRST.
  *
- * Bildup launches on the French lower-mid-market (French audience, French
+ * BildUp launches on the French lower-mid-market (French audience, French
  * targets), then expands: Benelux → Switzerland & Germany → Morocco & Italy.
  * The seed is France-dominant, with a few expansion-market previews. Every
  * company is tied to its official registry and every signal carries a

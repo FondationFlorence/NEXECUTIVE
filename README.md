@@ -1,4 +1,4 @@
-# Bildup
+# BildUp
 
 **Sourced acquisition intelligence for searchers & independent buyers** — the
 self-funded searcher, search fund, ETA buyer, or independent sponsor acquiring a single

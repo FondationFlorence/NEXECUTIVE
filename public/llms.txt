@@ -1,12 +1,12 @@
-# Bildup
+# BildUp
 
-> Sourced acquisition intelligence for searchers and independent buyers. Bildup surfaces off-market, owner-operated European businesses with real succession signals, ranks them against your acquisition thesis, and traces every signal to its primary source.
+> Sourced acquisition intelligence for searchers and independent buyers. BildUp surfaces off-market, owner-operated European businesses with real succession signals, ranks them against your acquisition thesis, and traces every signal to its primary source.
 
 ## What it is
 - A tool for ONE buyer acquiring ONE business: self-funded searchers, search funds, ETA (entrepreneurship through acquisition), independent sponsors, and acquisitive family offices.
 - Coverage: lower-mid-market companies across France first, expanding to the Benelux, then Switzerland & Germany, then Morocco & Italy — deep, not wide.
 - Verifiability is the product: every signal links to an official document, so any claim can be checked.
-- 100% buyer-side: Bildup is never mandated by a seller and never resells your deal flow.
+- 100% buyer-side: BildUp is never mandated by a seller and never resells your deal flow.
 - Beyond sourcing: cross-border build-up / roll-up suggestions, profitability-uplift levers, deep due diligence, and a vetted deal team (M&A lawyer, due diligence, financing, IT modernisation) at negotiated rates — introduced when you need them.
 
 ## Primary sources

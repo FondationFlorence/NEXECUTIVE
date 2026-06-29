@@ -109,7 +109,7 @@ ${nextMove}
 ## Sources
 ${sourcesBlock(company, signals)}
 
-_Généré par Bildup — moteur de gabarit. Chaque affirmation ci-dessus renvoie à une source primaire. Configurez OPENAI_API_KEY pour des briefs narratifs._`;
+_Généré par BildUp — moteur de gabarit. Chaque affirmation ci-dessus renvoie à une source primaire. Configurez OPENAI_API_KEY pour des briefs narratifs._`;
 }
 
 /** OpenAI-backed narrative brief. Throws on any API/SDK error. */
