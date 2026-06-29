@@ -2,12 +2,12 @@
 
 **Sourced acquisition intelligence for searchers & independent buyers** — the
 self-funded searcher, search fund, ETA buyer, or independent sponsor acquiring a single
-lower-mid-market European business. Give us your thesis; get a ranked shortlist of
-off-market, owner-operated targets with real succession signals — **every signal traced
-to its primary source** (Companies House, BODACC, Infogreffe, Firmenbuch, KVK, CRO,
+lower-mid-market business. **French audience and French targets first.** Give us your
+thesis; get a ranked shortlist of off-market, owner-operated targets with real succession
+signals — **every signal traced to its primary source** (Infogreffe, BODACC, INPI/RNE,
 CFNEWS). Verifiability is the product.
 
-Markets: France, UK, Germany, Austria, Netherlands, Ireland — deep, not wide.
+Markets: **France first**, then Benelux → Switzerland & Germany → Morocco & Italy — deep, not wide.
 
 The repo contains both the **marketing funnel** (landing page, thesis-first signup,
 behavioral nurture, pricing) and the **product** behind it (the authenticated workspace).

@@ -2,10 +2,14 @@
 
 ## What this app does
 Bildup is sourced acquisition intelligence for **one buyer**: the searcher / ETA /
-independent sponsor acquiring a single lower-mid-market European business. It surfaces
-off-market, owner-operated targets with real succession signals, ranks them against the
-buyer's thesis, and traces **every signal to its primary source** (Companies House,
-BODACC, Infogreffe, Firmenbuch, KVK, CRO, CFNEWS). Verifiability is the product.
+independent sponsor acquiring a single lower-mid-market business — **French audience and
+French targets first**. It surfaces off-market, owner-operated targets with real
+succession signals, ranks them against the buyer's thesis, and traces **every signal to
+its primary source** (Infogreffe, BODACC, INPI/RNE, CFNEWS). Verifiability is the product.
+
+**Geographic roadmap:** France → Benelux → Switzerland & Germany → Morocco & Italy.
+Each new market plugs in its official registry (KVK, BCE, RCS, Zefix, Handelsregister,
+OMPIC, Registro Imprese). Audience and copy are French-first.
 
 Positioning bets (single ICP, one product, one pain):
 1. One buyer — searcher/ETA/sponsor. (Dropped the lawyer + corp-dev ICPs.)
