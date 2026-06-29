@@ -1,5 +1,5 @@
 /**
- * Nexecutive entry point.
+ * Bildup entry point.
  * Wire middleware, route mounts, app.listen. All DB access via db/index.js.
  */
 const express = require('express');

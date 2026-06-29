@@ -9,4 +9,4 @@ Disallow: /settings
 Disallow: /company/
 Disallow: /api/
 
-Sitemap: https://nexecutive.com/sitemap.xml
+Sitemap: https://bildup.com/sitemap.xml

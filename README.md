@@ -1,4 +1,4 @@
-# Nexecutive
+# Bildup
 
 **Sourced acquisition intelligence for searchers & independent buyers** — the
 self-funded searcher, search fund, ETA buyer, or independent sponsor acquiring a single
@@ -39,7 +39,7 @@ Express.js · EJS · PostgreSQL (Neon) · Render · optional OpenAI for briefs
 
 ```bash
 npm install
-export DATABASE_URL="postgresql://user:pass@localhost:5432/nexecutive"
+export DATABASE_URL="postgresql://user:pass@localhost:5432/bildup"
 npm run migrate     # creates schema + seeds the target universe
 npm run dev         # http://localhost:3000
 ```

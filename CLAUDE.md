@@ -1,7 +1,7 @@
-# Nexecutive — CLAUDE.md
+# Bildup — CLAUDE.md
 
 ## What this app does
-Nexecutive is sourced acquisition intelligence for **one buyer**: the searcher / ETA /
+Bildup is sourced acquisition intelligence for **one buyer**: the searcher / ETA /
 independent sponsor acquiring a single lower-mid-market European business. It surfaces
 off-market, owner-operated targets with real succession signals, ranks them against the
 buyer's thesis, and traces **every signal to its primary source** (Companies House,
@@ -67,7 +67,7 @@ Express.js + EJS + Neon PostgreSQL + Render
 - `CONTACT_ENRICH_PROVIDER` (optional — enables contact enrichment via a pluggable provider)
 
 ## Recent changes
-- 2026-06-24 — Brand + pricing + contacts pass. New visual identity (brand charter): light theme, royal blue #2756C9, Spectral/Hanken Grotesk/IBM Plex Mono, logo assets in public/brand/ (favicon = monogram); theme.css re-skinned via token swap. Pricing re-architected to Searcher €299 / Sponsor €999 / Firm from €1,800 (sales-assisted). Behavioral emails now send Tue/Thu only. Deal briefs + company pages now list key contacts (name, role, email, LinkedIn, personal email) via contacts table + services/enrichment.js (pluggable provider, GDPR-aware). Removed all Polsia notions from app code (analytics beacon, polsia.app domain → nexecutive.com, POLSIA_* env → CRONS_ENABLED, footer credit); the cron manifest file remains the platform's scheduler config.
+- 2026-06-24 — Brand + pricing + contacts pass. New visual identity (brand charter): light theme, royal blue #2756C9, Spectral/Hanken Grotesk/IBM Plex Mono, logo assets in public/brand/ (favicon = monogram); theme.css re-skinned via token swap. Pricing re-architected to Searcher €299 / Sponsor €999 / Firm from €1,800 (sales-assisted). Behavioral emails now send Tue/Thu only. Deal briefs + company pages now list key contacts (name, role, email, LinkedIn, personal email) via contacts table + services/enrichment.js (pluggable provider, GDPR-aware). Removed all Polsia notions from app code (analytics beacon, polsia.app domain → bildup.com, POLSIA_* env → CRONS_ENABLED, footer credit); the cron manifest file remains the platform's scheduler config.
 - 2026-06-23 — Strategic pivot to one ICP (searcher/ETA/sponsor) with verifiability as the product. Every signal carries source + source_url (registries + CFNEWS); seed re-built for European lower-mid-market targets (FR/UK/DE/AT/NL/IE). New: thesis intake → instant shortlist (/onboarding, services/thesis.js, theses table). Scoring re-tuned around succession. Briefs cite sources. Behavioral email nurture (activated/dormant) replaces the fixed-day cadence; activation tracked. Removed Meta Pixel; added public/llms.txt for AEO. Pricing reframed (Searcher/Fund/Sponsor) + FAQ schema rewritten.
 - 2026-06-23 — Built the analysis product behind the landing page: target universe + screening engine (scoring.js), per-company detail with AI deal briefs (briefs.js, OpenAI + template fallback), watchlist, alerts feed, pipeline tracker, digest settings. New tables + seed. New router routes/app.js, autonomous jobs/signal-monitor.js.
 - 2026-06-23 — Fixes: added missing trial columns to migrations; corrected getUsersNeedingEmail (trial users have subscription_status='trial', not NULL); added GET /login and /signup pages; middleware/auth exports a callable function; replaced hardcoded SESSION_SECRET fallback (random in dev, required in prod); added urlencoded body parsing + error handler.
