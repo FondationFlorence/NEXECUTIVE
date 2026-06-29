@@ -4,19 +4,19 @@
 <main class="app-shell">
   <div class="page-head">
     <div>
-      <p class="eyebrow">Deal pipeline</p>
+      <p class="eyebrow">Pipeline d’opérations</p>
       <h1 class="page-title">Pipeline</h1>
-      <p class="page-sub"><%= total %> active deal<%= total === 1 ? '' : 's' %> · move targets through your process.</p>
+      <p class="page-sub"><%= total %> opération<%= total === 1 ? '' : 's' %> active<%= total === 1 ? '' : 's' %> · faites avancer vos cibles dans votre processus.</p>
     </div>
-    <a href="/targets" class="btn btn-gold">Add targets</a>
+    <a href="/targets" class="btn btn-gold">Ajouter des cibles</a>
   </div>
 
   <% if (total === 0) { %>
     <section class="panel">
       <div class="empty">
-        <h3>Your pipeline is empty</h3>
-        <p>Add a company to the pipeline from its profile to start tracking it.</p>
-        <p style="margin-top:1rem;"><a href="/targets" class="btn btn-gold">Screen targets</a></p>
+        <h3>Votre pipeline est vide</h3>
+        <p>Ajoutez une entreprise au pipeline depuis sa fiche pour commencer à la suivre.</p>
+        <p style="margin-top:1rem;"><a href="/targets" class="btn btn-gold">Cribler des cibles</a></p>
       </div>
     </section>
   <% } else { %>
@@ -24,24 +24,24 @@
       <% stages.forEach(function(stage){ %>
         <div class="board-col">
           <div class="board-col-head">
-            <span class="board-col-title"><%= fmt.title(stage) %></span>
+            <span class="board-col-title"><%= fmt.stage(stage) %></span>
             <span class="board-col-count"><%= byStage[stage].length %></span>
           </div>
           <% byStage[stage].forEach(function(d){ %>
             <div class="deal-card">
               <a href="/company/<%= d.company_slug %>" class="deal-card-name"><%= d.company_name %></a>
-              <div class="deal-card-meta"><%= d.sector %> · <%= d.country %></div>
+              <div class="deal-card-meta"><%= d.sector %> · <%= fmt.country(d.country) %></div>
               <% if (d.next_step) { %><div class="deal-next">→ <%= d.next_step %></div><% } %>
               <div class="deal-move">
                 <form method="post" action="/app/pipeline/move" class="inline-form" style="flex:1;">
                   <input type="hidden" name="deal_id" value="<%= d.id %>">
                   <select name="stage" onchange="this.form.submit()">
-                    <% stages.forEach(function(s){ %><option value="<%= s %>" <%= s === stage ? 'selected' : '' %>><%= fmt.title(s) %></option><% }) %>
+                    <% stages.forEach(function(s){ %><option value="<%= s %>" <%= s === stage ? 'selected' : '' %>><%= fmt.stage(s) %></option><% }) %>
                   </select>
                 </form>
                 <form method="post" action="/app/pipeline/remove" class="inline-form">
                   <input type="hidden" name="deal_id" value="<%= d.id %>">
-                  <button class="btn btn-sm btn-ghost" title="Remove">✕</button>
+                  <button class="btn btn-sm btn-ghost" title="Retirer">✕</button>
                 </form>
               </div>
             </div>

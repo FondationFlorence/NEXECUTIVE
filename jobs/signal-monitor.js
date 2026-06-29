@@ -25,12 +25,12 @@ const SEVERITIES = ['low', 'medium', 'medium', 'high'];
 
 // type, title, detail builder, sourceKind ('registry' | 'cfnews')
 const TEMPLATES = [
-  ['succession',   'Owner approaching retirement',     (c) => `Registry shows ${c.name}'s principal past typical retirement age — succession window opening.`, 'registry'],
-  ['ownership',    'Share-transfer notice filed',      (c) => `An ownership-change entry was filed for ${c.name}.`, 'registry'],
-  ['filing',       'New statutory accounts filed',     (c) => `${c.name} published fresh accounts — refresh the EBITDA read.`, 'registry'],
-  ['availability', 'Owner exploring an exit',          (c) => `${c.name}'s owner signalled openness to a sale (off-market).`, 'registry'],
-  ['deal',         'Comparable transaction closed',    (c) => `A comparable ${c.sector} business changed hands — a fresh multiples reference.`, 'cfnews'],
-  ['market',       'Sector consolidation accelerating',(c) => `Roll-up activity is rising in ${c.sector}.`, 'cfnews'],
+  ['succession',   'Dirigeant proche de la retraite',     (c) => `Le registre montre un dirigeant de ${c.name} au-delà de l'âge habituel de départ — fenêtre de succession qui s'ouvre.`, 'registry'],
+  ['ownership',    'Avis de cession de parts déposé',     (c) => `Une inscription de changement d'actionnariat a été déposée pour ${c.name}.`, 'registry'],
+  ['filing',       'Nouveaux comptes annuels déposés',    (c) => `${c.name} a publié de nouveaux comptes — actualisez la lecture de l'EBITDA.`, 'registry'],
+  ['availability', 'Dirigeant en réflexion sur une sortie',(c) => `Le dirigeant de ${c.name} s'est montré ouvert à une cession (hors-marché).`, 'registry'],
+  ['deal',         'Transaction comparable conclue',      (c) => `Une entreprise comparable du secteur ${c.sector} a changé de mains — nouvelle référence de multiples.`, 'cfnews'],
+  ['market',       'Consolidation du secteur qui accélère',(c) => `L'activité de build-up s'intensifie dans le secteur ${c.sector}.`, 'cfnews'],
 ];
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -56,7 +56,7 @@ async function main() {
 
   for (const c of companies) {
     const [type, title, detailFor, sourceKind] = pick(TEMPLATES);
-    const source = sourceKind === 'cfnews' ? 'CFNEWS' : (c.registry || 'Registry');
+    const source = sourceKind === 'cfnews' ? 'CFNEWS' : (c.registry || 'Registre');
     const sourceUrl = sourceKind === 'cfnews' ? CFNEWS + 'l-actualite/' : (c.registry_url || null);
     await create({
       company_id: c.id,

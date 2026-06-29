@@ -1,52 +1,52 @@
-<%- include('../partials/app-head', { title: 'Dashboard — Bildup' }) %>
+<%- include('../partials/app-head', { title: 'Tableau de bord — Bildup' }) %>
 <%- include('../partials/app-nav') %>
 
 <main class="app-shell">
   <div class="page-head">
     <div>
-      <p class="eyebrow">Workspace</p>
-      <h1 class="page-title"><%= thesis ? 'Targets matching your thesis' : 'Your shortlist' %></h1>
-      <p class="page-sub">Sourced M&amp;A signals across the targets you monitor — each traceable to an official document.</p>
+      <p class="eyebrow">Espace de travail</p>
+      <h1 class="page-title"><%= thesis ? 'Cibles correspondant à votre thèse' : 'Votre shortlist' %></h1>
+      <p class="page-sub">Signaux M&amp;A sourcés sur les cibles que vous suivez — chacun traçable à un document officiel.</p>
     </div>
-    <a href="/targets" class="btn btn-gold">Screen more targets</a>
+    <a href="/targets" class="btn btn-gold">Cribler plus de cibles</a>
   </div>
 
   <% if (needsThesis) { %>
     <div class="banner">
-      <span><strong>Set your acquisition thesis</strong> to get an instant shortlist of matching targets — sourced and ranked.</span>
-      <a href="/onboarding" class="btn btn-sm btn-gold">Build my shortlist</a>
+      <span><strong>Définissez votre thèse d’acquisition</strong> pour obtenir une shortlist instantanée de cibles correspondantes — sourcées et classées.</span>
+      <a href="/onboarding" class="btn btn-sm btn-gold">Construire ma shortlist</a>
     </div>
   <% } else if (trial.isExpired) { %>
     <div class="banner warn">
-      <span>Your free trial has ended. Subscribe to keep monitoring and generating sourced briefs.</span>
-      <a href="/#pricing" class="btn btn-sm">View plans</a>
+      <span>Votre essai gratuit est terminé. Abonnez-vous pour continuer la veille et générer des briefs sourcés.</span>
+      <a href="/#pricing" class="btn btn-sm">Voir les offres</a>
     </div>
   <% } else if (!trial.isPaid) { %>
     <div class="banner">
-      <span>You're on a free trial — <strong><%= trial.daysRemaining %> day<%= trial.daysRemaining === 1 ? '' : 's' %></strong> of full access remaining.</span>
-      <a href="/#pricing" class="btn btn-sm">Upgrade</a>
+      <span>Vous êtes en essai gratuit — <strong><%= trial.daysRemaining %> jour<%= trial.daysRemaining === 1 ? '' : 's' %></strong> d’accès complet restant<%= trial.daysRemaining === 1 ? '' : 's' %>.</span>
+      <a href="/#pricing" class="btn btn-sm">Passer à l’offre</a>
     </div>
   <% } %>
 
   <div class="stat-strip">
-    <div class="stat"><div class="stat-label">Monitored targets</div><div class="stat-value"><%= fmt.num(stats.universe) %></div></div>
-    <div class="stat"><div class="stat-label">Your shortlist</div><div class="stat-value"><%= stats.watching %></div></div>
-    <div class="stat"><div class="stat-label">Sourced signals · 30d</div><div class="stat-value gold"><%= stats.signals30d %></div></div>
-    <div class="stat"><div class="stat-label">Ripe now</div><div class="stat-value gold"><%= stats.hot %></div></div>
+    <div class="stat"><div class="stat-label">Cibles suivies</div><div class="stat-value"><%= fmt.num(stats.universe) %></div></div>
+    <div class="stat"><div class="stat-label">Votre shortlist</div><div class="stat-value"><%= stats.watching %></div></div>
+    <div class="stat"><div class="stat-label">Signaux sourcés · 30j</div><div class="stat-value gold"><%= stats.signals30d %></div></div>
+    <div class="stat"><div class="stat-label">Mûres maintenant</div><div class="stat-value gold"><%= stats.hot %></div></div>
   </div>
 
   <div class="grid grid-2">
     <section class="panel">
       <div class="panel-head">
-        <span class="panel-title">Your shortlist</span>
-        <a href="/targets" class="panel-link">Browse universe →</a>
+        <span class="panel-title">Votre shortlist</span>
+        <a href="/targets" class="panel-link">Parcourir l’univers →</a>
       </div>
 
       <% if (watchlist.length === 0) { %>
         <div class="empty">
-          <h3>No targets yet</h3>
-          <p>Set your thesis to get a ranked, sourced shortlist in seconds.</p>
-          <p style="margin-top:1rem;"><a href="/onboarding" class="btn btn-gold">Build my shortlist</a></p>
+          <h3>Aucune cible pour l’instant</h3>
+          <p>Définissez votre thèse pour obtenir une shortlist classée et sourcée en quelques secondes.</p>
+          <p style="margin-top:1rem;"><a href="/onboarding" class="btn btn-gold">Construire ma shortlist</a></p>
         </div>
       <% } else { %>
         <% watchlist.forEach(function(c) { %>
@@ -55,14 +55,14 @@
               <a href="/company/<%= c.slug %>" class="target-name"><%= c.name %></a>
               <div class="target-meta">
                 <span class="tag sector"><%= c.sector %></span>
-                <span class="dot"><%= c.country %></span>
-                <% if (c.owner_age) { %><span class="dot">owner <%= c.owner_age %></span><% } %>
-                <% if (c.availability) { %><span class="dot"><%= c.availability %></span><% } %>
-                <% if (c.signals.length) { %><span class="dot"><%= c.signals.length %> sourced signal<%= c.signals.length === 1 ? '' : 's' %></span><% } %>
+                <span class="dot"><%= fmt.country(c.country) %></span>
+                <% if (c.owner_age) { %><span class="dot">propriétaire <%= c.owner_age %> ans</span><% } %>
+                <% if (c.availability) { %><span class="dot"><%= fmt.availability(c.availability) %></span><% } %>
+                <% if (c.signals.length) { %><span class="dot"><%= c.signals.length %> signal<%= c.signals.length === 1 ? '' : 'aux' %> sourcé<%= c.signals.length === 1 ? '' : 's' %></span><% } %>
               </div>
             </div>
             <div class="target-side">
-              <% if (thesis) { %><span class="match-badge <%= c.match.match >= 70 ? 'strong' : '' %>"><%= c.match.match %>% fit</span><% } %>
+              <% if (thesis) { %><span class="match-badge <%= c.match.match >= 70 ? 'strong' : '' %>"><%= c.match.match %>% thèse</span><% } %>
               <span class="score score-<%= c.score.band.toLowerCase() %>"><b><%= c.score.total %></b>/100</span>
             </div>
           </div>
@@ -73,11 +73,11 @@
     <div class="grid">
       <section class="panel">
         <div class="panel-head">
-          <span class="panel-title">Live sourced signals</span>
-          <a href="/alerts" class="panel-link">All →</a>
+          <span class="panel-title">Signaux sourcés en direct</span>
+          <a href="/alerts" class="panel-link">Tout →</a>
         </div>
         <% if (recentAlerts.length === 0) { %>
-          <p class="page-sub">No signals on your shortlist yet.</p>
+          <p class="page-sub">Aucun signal sur votre shortlist pour l’instant.</p>
         <% } else { %>
           <% recentAlerts.slice(0, 6).forEach(function(a) { %>
             <div class="alert-item">
@@ -86,7 +86,7 @@
                 <div class="alert-title"><%= a.title %></div>
                 <div class="alert-foot">
                   <a href="/company/<%= a.company_slug %>" class="reg-chip" style="text-decoration:none;color:var(--gold-dim)"><%= a.company_name %></a>
-                  <span class="sev-chip <%= fmt.sev(a.severity) %>"><%= a.severity %></span>
+                  <span class="sev-chip <%= fmt.sev(a.severity) %>"><%= fmt.severity(a.severity) %></span>
                   <% if (a.source_url) { %><a class="src-link" href="<%= a.source_url %>" target="_blank" rel="noopener"><%= a.source || 'source' %></a><% } else if (a.source) { %><span class="reg-chip"><%= a.source %></span><% } %>
                   <span><%= fmt.timeAgo(a.signal_date) %></span>
                 </div>
@@ -99,10 +99,10 @@
       <section class="panel">
         <div class="panel-head">
           <span class="panel-title">Pipeline</span>
-          <a href="/pipeline" class="panel-link">Board →</a>
+          <a href="/pipeline" class="panel-link">Tableau →</a>
         </div>
         <% if (pipeline.length === 0) { %>
-          <p class="page-sub">No active deals. Add a target to your pipeline from its profile.</p>
+          <p class="page-sub">Aucune opération active. Ajoutez une cible à votre pipeline depuis sa fiche.</p>
         <% } else { %>
           <% pipeline.slice(0, 6).forEach(function(d) { %>
             <div class="target-row">
@@ -110,7 +110,7 @@
                 <a href="/company/<%= d.company_slug %>" class="target-name" style="font-size:0.88rem"><%= d.company_name %></a>
                 <% if (d.next_step) { %><div class="target-meta"><%= d.next_step %></div><% } %>
               </div>
-              <span class="tag"><%= fmt.title(d.stage) %></span>
+              <span class="tag"><%= fmt.stage(d.stage) %></span>
             </div>
           <% }) %>
         <% } %>

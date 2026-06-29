@@ -7,66 +7,62 @@
  * (registry filing, BODACC notice, CFNEWS article…).
  *
  * Uses OpenAI when OPENAI_API_KEY is configured; otherwise a deterministic
- * template so the feature works in every environment.
+ * template so the feature works in every environment. French-first output.
  *
  *   generateBrief(company, signals, score) -> { content, model }
  */
 const { scoreCompany } = require('./scoring');
+const fmt = require('../lib/format');
 
 const MODEL = process.env.OPENAI_BRIEF_MODEL || 'gpt-4o-mini';
 
-function eur(n) {
-  if (n == null) return '—';
-  const m = Number(n) / 1_000_000;
-  if (m >= 1000) return `€${(m / 1000).toFixed(1)}B`;
-  return `€${m.toFixed(m < 10 ? 1 : 0)}M`;
-}
+const eur = fmt.eur;
 
 function factSheet(company) {
   return [
-    `Name: ${company.name}`,
-    `Sector: ${company.sector}`,
-    `HQ: ${[company.hq_city, company.country].filter(Boolean).join(', ')}`,
-    `Registry: ${company.registry || '—'}${company.registry_url ? ` (${company.registry_url})` : ''}`,
-    `Founded: ${company.founded_year || '—'}`,
-    `Employees: ${company.employees ?? '—'}`,
-    `Revenue: ${eur(company.revenue_eur)}`,
-    company.ebitda_eur ? `EBITDA: ${eur(company.ebitda_eur)}` : null,
-    `Owner age: ${company.owner_age || '—'}`,
-    `Availability: ${company.availability || '—'}`,
-    `Ownership: ${company.ownership || '—'}`,
-    `Indicative valuation: ${eur(company.valuation_eur)}`,
-    `Description: ${company.description || '—'}`,
+    `Nom : ${company.name}`,
+    `Secteur : ${company.sector}`,
+    `Siège : ${[company.hq_city, fmt.country(company.country)].filter(Boolean).join(', ')}`,
+    `Registre : ${company.registry || '—'}${company.registry_url ? ` (${company.registry_url})` : ''}`,
+    `Création : ${company.founded_year || '—'}`,
+    `Effectif : ${company.employees ?? '—'}`,
+    `CA : ${eur(company.revenue_eur)}`,
+    company.ebitda_eur ? `EBITDA : ${eur(company.ebitda_eur)}` : null,
+    `Âge du dirigeant : ${company.owner_age || '—'}`,
+    `Disponibilité : ${fmt.availability(company.availability) || '—'}`,
+    `Détention : ${fmt.ownership(company.ownership) || '—'}`,
+    `Valorisation indicative : ${eur(company.valuation_eur)}`,
+    `Description : ${company.description || '—'}`,
   ].filter(Boolean).join('\n');
 }
 
 function signalLines(signals) {
-  if (!signals || signals.length === 0) return 'No active signals in the monitoring window.';
+  if (!signals || signals.length === 0) return 'Aucun signal actif dans la fenêtre de veille.';
   return signals.slice(0, 8).map((s) => {
     const when = new Date(s.signal_date || s.created_at).toISOString().slice(0, 10);
     const src = s.source_url ? ` ([${s.source || 'source'}](${s.source_url}))` : s.source ? ` (${s.source})` : '';
-    return `- (${when}, ${s.severity}/${s.type}) ${s.title}${s.detail ? ' — ' + s.detail : ''}${src}`;
+    return `- (${when}, ${fmt.severity(s.severity)}/${fmt.alertType(s.type)}) ${s.title}${s.detail ? ' — ' + s.detail : ''}${src}`;
   }).join('\n');
 }
 
 function sourcesBlock(company, signals) {
   const lines = [];
-  if (company.registry_url) lines.push(`- Company record — [${company.registry || 'Registry'}](${company.registry_url})`);
+  if (company.registry_url) lines.push(`- Fiche entreprise — [${company.registry || 'Registre'}](${company.registry_url})`);
   for (const s of signals || []) {
     if (s.source_url) lines.push(`- ${s.title} — [${s.source || 'source'}](${s.source_url})`);
   }
-  return lines.length ? lines.join('\n') : '- No source links available for this target yet.';
+  return lines.length ? lines.join('\n') : '- Aucun lien source disponible pour cette cible pour l’instant.';
 }
 
 function contactLines(contacts) {
-  if (!contacts || contacts.length === 0) return 'No contacts identified yet — enrichment pending.';
+  if (!contacts || contacts.length === 0) return 'Aucun contact identifié pour l’instant — enrichissement en attente.';
   return contacts.slice(0, 6).map((c) => {
     const bits = [`**${c.name}**${c.role ? ' — ' + c.role : ''}`];
-    if (c.email) bits.push(`email: ${c.email}`);
-    if (c.personal_email) bits.push(`personal: ${c.personal_email}`);
-    if (c.phone) bits.push(`phone: ${c.phone}`);
+    if (c.email) bits.push(`e-mail : ${c.email}`);
+    if (c.personal_email) bits.push(`perso : ${c.personal_email}`);
+    if (c.phone) bits.push(`tél. : ${c.phone}`);
     if (c.linkedin_url) bits.push(`[LinkedIn](${c.linkedin_url})`);
-    const conf = c.confidence ? ` _(source: ${c.source || 'registry'}, ${c.confidence})_` : '';
+    const conf = c.confidence ? ` _(source : ${c.source || 'registre'}, ${c.confidence})_` : '';
     return `- ${bits.join(' · ')}${conf}`;
   }).join('\n');
 }
@@ -76,43 +72,44 @@ function templateBrief(company, signals, score, contacts) {
   const s = score || scoreCompany(company, { signals });
   const margin = company.ebitda_eur && company.revenue_eur
     ? Math.round((company.ebitda_eur / company.revenue_eur) * 100) : null;
+  const revM = Number(company.revenue_eur || 0) / 1e6;
 
   const nextMove = s.total >= 75
-    ? 'Originate now — the succession/availability window is open and the score is high. Draft a direct, owner-to-owner approach.'
+    ? 'Engagez maintenant — la fenêtre succession/disponibilité est ouverte et le score est élevé. Préparez une approche directe, de dirigeant à dirigeant.'
     : s.total >= 55
-      ? 'Add to the active shortlist and set a trigger on the next ownership or filing signal before approaching.'
-      : 'Keep monitoring; revisit when a succession, availability, or deal signal fires.';
+      ? 'Ajoutez à la shortlist active et placez un déclencheur sur le prochain signal de cession ou de dépôt avant d’approcher.'
+      : 'Continuez la veille ; revenez quand un signal de succession, de disponibilité ou d’opération se déclenche.';
 
-  return `# Acquisition Brief — ${company.name}
+  return `# Brief d’acquisition — ${company.name}
 
-**Fit score: ${s.total}/100 (${s.band})** · Top drivers: ${s.drivers.join(', ')}
+**Score de fit : ${s.total}/100 (${fmt.band(s.band)})** · Principaux moteurs : ${s.drivers.join(', ')}
 
-## Snapshot
-${company.name} is a ${company.sector} business in ${[company.hq_city, company.country].filter(Boolean).join(', ')}, founded ${company.founded_year || 'n/a'}, ~${company.employees ?? 'n/a'} staff. Revenue ${eur(company.revenue_eur)}${company.ebitda_eur ? `, EBITDA ${eur(company.ebitda_eur)}${margin != null ? ` (${margin}% margin)` : ''}` : ''}. ${company.ownership ? company.ownership.replace('-', ' ') : 'Privately'} held, indicative valuation ${eur(company.valuation_eur)}.
+## Aperçu
+${company.name} est une entreprise du secteur ${company.sector} à ${[company.hq_city, fmt.country(company.country)].filter(Boolean).join(', ')}, créée en ${company.founded_year || 'n.c.'}, ~${company.employees ?? 'n.c.'} salariés. CA ${eur(company.revenue_eur)}${company.ebitda_eur ? `, EBITDA ${eur(company.ebitda_eur)}${margin != null ? ` (marge ${margin} %)` : ''}` : ''}. ${company.ownership ? fmt.ownership(company.ownership) : 'Détention privée'}, valorisation indicative ${eur(company.valuation_eur)}.
 
-## Why it's ripe now
-- Owner ${company.owner_age ? `aged ${company.owner_age}` : 'age undisclosed'}, status **${company.availability || 'unknown'}** — ${company.owner_age >= 62 ? 'a credible succession window' : 'monitor for a succession trigger'}.
-- Sector heat ${company.sector_heat ?? 'n/a'}/100 — ${company.sector_heat >= 75 ? 'active roll-up; act before consolidators do' : company.sector_heat >= 55 ? 'warming; selective competition' : 'quiet; originate off-market'}.
-- Size ${Number(company.revenue_eur || 0) / 1e6 <= 20 && Number(company.revenue_eur || 0) / 1e6 >= 3 ? 'sits inside' : 'sits outside'} the lower-mid-market sweet spot.
+## Pourquoi c’est mûr maintenant
+- Dirigeant ${company.owner_age ? `âgé de ${company.owner_age} ans` : 'âge non communiqué'}, statut **${fmt.availability(company.availability) || 'inconnu'}** — ${company.owner_age >= 62 ? 'fenêtre de succession crédible' : 'à surveiller pour un déclencheur de succession'}.
+- Chaleur du secteur ${company.sector_heat ?? 'n.c.'}/100 — ${company.sector_heat >= 75 ? 'build-up actif ; agissez avant les consolidateurs' : company.sector_heat >= 55 ? 'en réchauffement ; concurrence sélective' : 'calme ; origination hors-marché'}.
+- Taille ${revM <= 20 && revM >= 3 ? 'dans' : 'hors de'} la zone idéale du lower-mid-market.
 
-## Signal trail (sourced)
+## Piste des signaux (sourcés)
 ${signalLines(signals)}
 
-## What to verify next
-- Pull the latest statutory accounts from the registry and confirm the EBITDA margin.
-- Confirm the ownership/PSC structure and any registered charges.
-- Validate the availability signal directly before committing diligence time.
+## À vérifier ensuite
+- Récupérer les derniers comptes annuels au registre et confirmer la marge EBITDA.
+- Confirmer la structure de détention (bénéficiaires effectifs) et d’éventuels nantissements inscrits.
+- Valider directement le signal de disponibilité avant d’engager du temps de due diligence.
 
-## Key contacts
+## Contacts clés
 ${contactLines(contacts)}
 
-## Recommended next move
+## Prochaine action recommandée
 ${nextMove}
 
 ## Sources
 ${sourcesBlock(company, signals)}
 
-_Generated by Bildup — template engine. Every claim above links to a primary source. Configure OPENAI_API_KEY for narrative briefs._`;
+_Généré par Bildup — moteur de gabarit. Chaque affirmation ci-dessus renvoie à une source primaire. Configurez OPENAI_API_KEY pour des briefs narratifs._`;
 }
 
 /** OpenAI-backed narrative brief. Throws on any API/SDK error. */
@@ -122,21 +119,22 @@ async function openaiBrief(company, signals, score, contacts) {
   const s = score || scoreCompany(company, { signals });
 
   const system =
-    'You are a senior analyst at a search fund / ETA acquirer. Write concise, ' +
-    'executive-ready acquisition briefs in Markdown for an individual buyer purchasing ONE ' +
-    'lower-mid-market company. Be specific and quantitative. NEVER invent figures or contact ' +
-    'details beyond the data provided. Every factual claim must be traceable to a provided source. ' +
-    'Use these sections: Snapshot, Why it\'s ripe now, Signal trail (sourced), Key contacts, ' +
-    'What to verify next, Recommended next move, Sources. In Key contacts, list each named person ' +
-    'with role, email, personal email and LinkedIn exactly as provided (do not fabricate). In ' +
-    'Sources, list each signal as a Markdown link to its source URL.';
+    'Tu es analyste senior dans un search fund / un repreneur ETA. Rédige en FRANÇAIS des ' +
+    'briefs d’acquisition concis et prêts à présenter, au format Markdown, pour un acheteur ' +
+    'individuel qui rachète UNE entreprise du lower-mid-market. Sois précis et quantitatif. ' +
+    'N’invente JAMAIS de chiffres ni de coordonnées au-delà des données fournies. Chaque ' +
+    'affirmation factuelle doit être traçable à une source fournie. Utilise ces sections : ' +
+    'Aperçu, Pourquoi c’est mûr maintenant, Piste des signaux (sourcés), Contacts clés, ' +
+    'À vérifier ensuite, Prochaine action recommandée, Sources. Dans Contacts clés, liste chaque ' +
+    'personne nommée avec son rôle, e-mail, e-mail perso et LinkedIn exactement comme fournis ' +
+    '(sans rien fabriquer). Dans Sources, liste chaque signal sous forme de lien Markdown vers son URL source.';
 
   const user =
-    `Write an acquisition brief for this target.\n\n` +
-    `FIT SCORE: ${s.total}/100 (${s.band}); top drivers: ${s.drivers.join(', ')}\n\n` +
-    `FUNDAMENTALS:\n${factSheet(company)}\n\n` +
-    `SOURCED SIGNALS:\n${signalLines(signals)}\n\n` +
-    `KEY CONTACTS:\n${contactLines(contacts)}\n`;
+    `Rédige un brief d’acquisition pour cette cible.\n\n` +
+    `SCORE DE FIT : ${s.total}/100 (${fmt.band(s.band)}) ; principaux moteurs : ${s.drivers.join(', ')}\n\n` +
+    `FONDAMENTAUX :\n${factSheet(company)}\n\n` +
+    `SIGNAUX SOURCÉS :\n${signalLines(signals)}\n\n` +
+    `CONTACTS CLÉS :\n${contactLines(contacts)}\n`;
 
   const resp = await client.chat.completions.create({
     model: MODEL,

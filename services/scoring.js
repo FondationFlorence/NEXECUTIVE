@@ -27,6 +27,10 @@ const AVAIL_READINESS = {
   'for-sale': 1, exploring: 0.8, rumoured: 0.7, 'off-market': 0.5,
 };
 
+const AVAIL_LABEL_FR = {
+  'for-sale': 'à vendre', exploring: 'en réflexion', rumoured: 'rumeur', 'off-market': 'hors-marché',
+};
+
 function succession(company) {
   const age = Number(company.owner_age || 0);
   const ageScore = age >= 68 ? 1 : age >= 64 ? 0.85 : age >= 60 ? 0.65 : age >= 56 ? 0.45 : age ? 0.3 : 0.4;
@@ -34,16 +38,16 @@ function succession(company) {
   const factor = 0.6 * ageScore + 0.4 * ready;
   const score = round(factor * 25);
   const bits = [];
-  if (age) bits.push(`owner ${age}`);
-  if (company.availability) bits.push(company.availability);
-  return { key: 'succession', label: 'Succession window', score, max: 25,
-    note: bits.join(' · ') || 'No owner data' };
+  if (age) bits.push(`propriétaire ${age} ans`);
+  if (company.availability) bits.push(AVAIL_LABEL_FR[(company.availability || '').toLowerCase()] || company.availability);
+  return { key: 'succession', label: 'Fenêtre de succession', score, max: 25,
+    note: bits.join(' · ') || 'Aucune donnée dirigeant' };
 }
 
 function consolidation(company) {
   const heat = clamp(company.sector_heat ?? 50, 0, 100);
-  return { key: 'consolidation', label: 'Consolidation heat', score: round((heat / 100) * 20), max: 20,
-    note: `Sector heat ${heat}/100` };
+  return { key: 'consolidation', label: 'Chaleur de consolidation', score: round((heat / 100) * 20), max: 20,
+    note: `Chaleur du secteur ${heat}/100` };
 }
 
 function sizeFit(company) {
@@ -54,18 +58,18 @@ function sizeFit(company) {
   else if (m < 3) factor = 0.45 + 0.55 * (m / 3);
   else if (m <= 20) factor = 1;
   else factor = clamp(1 - (m - 20) / 60, 0.3, 1);
-  return { key: 'sizeFit', label: 'Size fit (lower-mid)', score: round(factor * 20), max: 20,
-    note: m ? `~€${m.toFixed(1)}M revenue` : 'No revenue data' };
+  return { key: 'sizeFit', label: 'Adéquation de taille (lower-mid)', score: round(factor * 20), max: 20,
+    note: m ? `~${m.toFixed(1).replace('.', ',')} M€ de CA` : 'Aucune donnée de CA' };
 }
 
 function quality(company) {
   const rev = Number(company.revenue_eur ?? 0);
   const ebitda = Number(company.ebitda_eur ?? 0);
-  if (!rev || !ebitda) return { key: 'quality', label: 'Cash quality (EBITDA margin)', score: 7, max: 15, note: 'No margin data' };
+  if (!rev || !ebitda) return { key: 'quality', label: 'Qualité du cash (marge EBITDA)', score: 7, max: 15, note: 'Aucune donnée de marge' };
   const margin = ebitda / rev; // 0..1
   const factor = clamp((margin - 0.08) / (0.20 - 0.08), 0, 1); // 8%→20% maps 0→1
-  return { key: 'quality', label: 'Cash quality (EBITDA margin)', score: round(factor * 15), max: 15,
-    note: `${Math.round(margin * 100)}% margin` };
+  return { key: 'quality', label: 'Qualité du cash (marge EBITDA)', score: round(factor * 15), max: 15,
+    note: `marge ${Math.round(margin * 100)} %` };
 }
 
 function momentum(signals) {
@@ -76,8 +80,8 @@ function momentum(signals) {
   });
   const raw = recent.reduce((sum, s) => sum + (SEVERITY_WEIGHT[s.severity] || 1), 0);
   const score = round(clamp(raw / 10, 0, 1) * 20);
-  return { key: 'momentum', label: 'Signal momentum', score, max: 20,
-    note: recent.length ? `${recent.length} sourced signal${recent.length === 1 ? '' : 's'} · 45d` : 'Quiet' };
+  return { key: 'momentum', label: 'Dynamique des signaux', score, max: 20,
+    note: recent.length ? `${recent.length} signal${recent.length === 1 ? '' : 'aux'} sourcé${recent.length === 1 ? '' : 's'} · 45j` : 'Calme' };
 }
 
 function bandFor(total) {

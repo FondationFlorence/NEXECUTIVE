@@ -1,21 +1,21 @@
-<%- include('../partials/app-head', { title: 'Alerts — Bildup' }) %>
+<%- include('../partials/app-head', { title: 'Alertes — Bildup' }) %>
 <%- include('../partials/app-nav') %>
 
 <main class="app-shell">
   <div class="page-head">
     <div>
-      <p class="eyebrow">Signal feed</p>
-      <h1 class="page-title">Sourced alerts</h1>
-      <p class="page-sub">M&amp;A signals across your shortlist — every one links back to its primary source.</p>
+      <p class="eyebrow">Flux de signaux</p>
+      <h1 class="page-title">Alertes sourcées</h1>
+      <p class="page-sub">Signaux M&amp;A sur votre shortlist — chacun renvoie à sa source primaire.</p>
     </div>
   </div>
 
   <section class="panel">
     <% if (alerts.length === 0) { %>
       <div class="empty">
-        <h3>No signals yet</h3>
-        <p>Build your shortlist and signals will surface here as they fire — each traceable to an official document.</p>
-        <p style="margin-top:1rem;"><a href="/onboarding" class="btn btn-gold">Build my shortlist</a></p>
+        <h3>Aucun signal pour l’instant</h3>
+        <p>Construisez votre shortlist et les signaux apparaîtront ici dès qu’ils se déclenchent — chacun traçable à un document officiel.</p>
+        <p style="margin-top:1rem;"><a href="/onboarding" class="btn btn-gold">Construire ma shortlist</a></p>
       </div>
     <% } else { %>
       <% alerts.forEach(function(a){ %>
@@ -26,8 +26,8 @@
             <% if (a.detail) { %><div class="alert-detail"><%= a.detail %></div><% } %>
             <div class="alert-foot">
               <a href="/company/<%= a.company_slug %>" class="reg-chip" style="text-decoration:none;color:var(--gold-dim)"><%= a.company_name %></a>
-              <span class="sev-chip <%= fmt.sev(a.severity) %>"><%= a.severity %></span>
-              <span class="reg-chip"><%= fmt.title(a.type) %></span>
+              <span class="sev-chip <%= fmt.sev(a.severity) %>"><%= fmt.severity(a.severity) %></span>
+              <span class="reg-chip"><%= fmt.alertType(a.type) %></span>
               <% if (a.source_url) { %>
                 <a class="src-link" href="<%= a.source_url %>" target="_blank" rel="noopener"><%= a.source || 'source' %></a>
               <% } else if (a.source) { %><span class="reg-chip"><%= a.source %></span><% } %>

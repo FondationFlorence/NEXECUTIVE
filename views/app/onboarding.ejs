@@ -1,18 +1,18 @@
-<%- include('../partials/app-head', { title: 'Your thesis — Bildup' }) %>
+<%- include('../partials/app-head', { title: 'Votre thèse — Bildup' }) %>
 <%- include('../partials/app-nav') %>
 
 <main class="app-shell">
   <div class="page-head">
     <div>
-      <p class="eyebrow">Start here · 60 seconds</p>
-      <h1 class="page-title">What are you hunting?</h1>
-      <p class="page-sub">Give us your acquisition thesis and we'll hand back a ranked shortlist from <%= total %> monitored European targets — every one traced to an official source. No waiting.</p>
+      <p class="eyebrow">Commencez ici · 60 secondes</p>
+      <h1 class="page-title">Que recherchez-vous ?</h1>
+      <p class="page-sub">Donnez-nous votre thèse d’acquisition et nous vous renvoyons une shortlist classée parmi <%= total %> cibles suivies — chacune reliée à une source officielle. Sans attente.</p>
     </div>
   </div>
 
   <form method="post" action="/onboarding" class="panel" style="max-width:760px;">
     <div class="form-row" style="margin-bottom:1.5rem;">
-      <label>Sectors <span style="color:var(--text-muted);text-transform:none;letter-spacing:0;">(pick any — leave empty for all)</span></label>
+      <label>Secteurs <span style="color:var(--text-muted);text-transform:none;letter-spacing:0;">(au choix — laissez vide pour tout)</span></label>
       <div class="choice-grid">
         <% sectors.forEach(function(s){ %>
           <label class="choice"><input type="checkbox" name="sectors" value="<%= s %>" <%= (thesis && (thesis.sectors||[]).includes(s)) ? 'checked' : '' %>> <%= s %></label>
@@ -21,31 +21,31 @@
     </div>
 
     <div class="form-row" style="margin-bottom:1.5rem;">
-      <label>Geographies</label>
+      <label>Géographies</label>
       <div class="choice-grid">
         <% countries.forEach(function(c){ %>
-          <label class="choice"><input type="checkbox" name="countries" value="<%= c %>" <%= (thesis && (thesis.countries||[]).includes(c)) ? 'checked' : '' %>> <%= c %></label>
+          <label class="choice"><input type="checkbox" name="countries" value="<%= c %>" <%= (thesis && (thesis.countries||[]).includes(c)) ? 'checked' : '' %>> <%= fmt.country(c) %></label>
         <% }) %>
       </div>
     </div>
 
     <div class="form-row" style="margin-bottom:1.5rem;">
-      <label>Revenue band (€M)</label>
+      <label>Tranche de CA (M€)</label>
       <div class="range-row">
         <input type="number" name="rev_min" min="0" step="0.5" placeholder="min" value="<%= thesis && thesis.rev_min ? (thesis.rev_min/1e6) : '' %>">
-        <span>to</span>
+        <span>à</span>
         <input type="number" name="rev_max" min="0" step="0.5" placeholder="max" value="<%= thesis && thesis.rev_max ? (thesis.rev_max/1e6) : '' %>">
-        <span>€M revenue</span>
+        <span>M€ de CA</span>
       </div>
     </div>
 
     <div class="form-row" style="margin-bottom:1.75rem;">
-      <label>Thesis keywords <span style="color:var(--text-muted);text-transform:none;letter-spacing:0;">(optional)</span></label>
-      <input type="text" name="keywords" placeholder="e.g. recurring revenue, succession, asset-light services" value="<%= thesis ? (thesis.keywords||'') : '' %>" style="width:100%;">
+      <label>Mots-clés de thèse <span style="color:var(--text-muted);text-transform:none;letter-spacing:0;">(optionnel)</span></label>
+      <input type="text" name="keywords" placeholder="ex. revenu récurrent, succession, services peu capitalistiques" value="<%= thesis ? (thesis.keywords||'') : '' %>" style="width:100%;">
     </div>
 
-    <button type="submit" class="btn btn-gold">Show me my targets →</button>
-    <p class="verify-note" style="margin-top:1rem;">🔒 Every signal links to its primary source — Infogreffe, BODACC, INPI, CFNEWS.</p>
+    <button type="submit" class="btn btn-gold">Montrez-moi mes cibles →</button>
+    <p class="verify-note" style="margin-top:1rem;">🔒 Chaque signal renvoie à sa source primaire — Infogreffe, BODACC, INPI, CFNEWS.</p>
   </form>
 </main>
 </body>

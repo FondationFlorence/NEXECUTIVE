@@ -37,8 +37,8 @@ async function seedFromThesis(userId, thesis) {
   for (const c of shortlist) {
     await watchlist.add(userId, c.id, c.score.total);
   }
-  if (shortlist[0]) await pipeline.addCompany(userId, shortlist[0].id, { stage: 'screening', next_step: 'Confirm accounts + ownership' });
-  if (shortlist[1]) await pipeline.addCompany(userId, shortlist[1].id, { stage: 'sourced', next_step: 'Draft owner approach' });
+  if (shortlist[0]) await pipeline.addCompany(userId, shortlist[0].id, { stage: 'screening', next_step: 'Confirmer les comptes + l’actionnariat' });
+  if (shortlist[1]) await pipeline.addCompany(userId, shortlist[1].id, { stage: 'sourced', next_step: 'Préparer l’approche du dirigeant' });
   await digests.upsert(userId, { frequency: 'weekly', hour_utc: 8, enabled: true });
 
   return shortlist;

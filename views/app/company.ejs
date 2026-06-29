@@ -2,17 +2,17 @@
 <%- include('../partials/app-nav') %>
 
 <main class="app-shell">
-  <p class="page-sub" style="margin-bottom:1rem;"><a href="/targets" class="panel-link">← Targets</a></p>
+  <p class="page-sub" style="margin-bottom:1rem;"><a href="/targets" class="panel-link">← Cibles</a></p>
 
   <div class="company-head">
     <div>
-      <p class="eyebrow"><%= company.sector %> · <%= company.hq_city ? company.hq_city + ', ' : '' %><%= company.country %></p>
+      <p class="eyebrow"><%= company.sector %> · <%= company.hq_city ? company.hq_city + ', ' : '' %><%= fmt.country(company.country) %></p>
       <h1 class="page-title"><%= company.name %></h1>
       <p class="page-sub" style="max-width:60ch;"><%= company.description || '' %></p>
       <div style="margin-top:0.9rem;display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
-        <span class="score score-<%= score.band.toLowerCase() %>"><b><%= score.total %></b>/100 · <%= score.band %></span>
+        <span class="score score-<%= score.band.toLowerCase() %>"><b><%= score.total %></b>/100 · <%= fmt.band(score.band) %></span>
         <% if (company.registry_url) { %>
-          <a class="src-link" href="<%= company.registry_url %>" target="_blank" rel="noopener">Verify on <%= company.registry %></a>
+          <a class="src-link" href="<%= company.registry_url %>" target="_blank" rel="noopener">Vérifier sur <%= company.registry %></a>
         <% } %>
       </div>
     </div>
@@ -20,16 +20,16 @@
       <% if (watched) { %>
         <form method="post" action="/app/watchlist/remove" class="inline-form">
           <input type="hidden" name="company_id" value="<%= company.id %>"><input type="hidden" name="return_to" value="/company/<%= company.slug %>">
-          <button class="btn btn-ghost">Watching ✓</button>
+          <button class="btn btn-ghost">Suivie ✓</button>
         </form>
       <% } else { %>
         <form method="post" action="/app/watchlist/add" class="inline-form">
           <input type="hidden" name="company_id" value="<%= company.id %>"><input type="hidden" name="return_to" value="/company/<%= company.slug %>">
-          <button class="btn">+ Watch</button>
+          <button class="btn">+ Suivre</button>
         </form>
       <% } %>
       <% if (inPipeline) { %>
-        <a href="/pipeline" class="btn btn-ghost">In pipeline →</a>
+        <a href="/pipeline" class="btn btn-ghost">Dans le pipeline →</a>
       <% } else { %>
         <form method="post" action="/app/pipeline/add" class="inline-form">
           <input type="hidden" name="company_id" value="<%= company.id %>"><input type="hidden" name="return_to" value="/company/<%= company.slug %>">
@@ -41,22 +41,22 @@
 
   <section class="panel" style="margin-bottom:1.25rem;">
     <div class="facts">
-      <div><div class="fact-label">Revenue</div><div class="fact-value"><%= fmt.eur(company.revenue_eur) %></div></div>
+      <div><div class="fact-label">CA</div><div class="fact-value"><%= fmt.eur(company.revenue_eur) %></div></div>
       <div><div class="fact-label">EBITDA</div><div class="fact-value"><%= fmt.eur(company.ebitda_eur) %><% if (company.ebitda_eur && company.revenue_eur) { %> <span style="color:var(--text-muted);font-size:0.8rem;">(<%= Math.round(company.ebitda_eur/company.revenue_eur*100) %>%)</span><% } %></div></div>
-      <div><div class="fact-label">Owner age</div><div class="fact-value"><%= company.owner_age || '—' %></div></div>
-      <div><div class="fact-label">Availability</div><div class="fact-value"><%= fmt.title(company.availability) %></div></div>
-      <div><div class="fact-label">Ownership</div><div class="fact-value"><%= fmt.title(company.ownership) %></div></div>
-      <div><div class="fact-label">Employees</div><div class="fact-value"><%= fmt.num(company.employees) %></div></div>
-      <div><div class="fact-label">Founded</div><div class="fact-value"><%= company.founded_year || '—' %></div></div>
-      <div><div class="fact-label">Indicative value</div><div class="fact-value"><%= fmt.eur(company.valuation_eur) %></div></div>
-      <div><div class="fact-label">Sector heat</div><div class="fact-value"><%= company.sector_heat %>/100</div></div>
+      <div><div class="fact-label">Âge du dirigeant</div><div class="fact-value"><%= company.owner_age || '—' %></div></div>
+      <div><div class="fact-label">Disponibilité</div><div class="fact-value"><%= fmt.availability(company.availability) %></div></div>
+      <div><div class="fact-label">Détention</div><div class="fact-value"><%= fmt.ownership(company.ownership) %></div></div>
+      <div><div class="fact-label">Effectif</div><div class="fact-value"><%= fmt.num(company.employees) %></div></div>
+      <div><div class="fact-label">Création</div><div class="fact-value"><%= company.founded_year || '—' %></div></div>
+      <div><div class="fact-label">Valorisation indicative</div><div class="fact-value"><%= fmt.eur(company.valuation_eur) %></div></div>
+      <div><div class="fact-label">Chaleur du secteur</div><div class="fact-value"><%= company.sector_heat %>/100</div></div>
     </div>
   </section>
 
   <div class="grid grid-2">
     <div class="grid">
       <section class="panel">
-        <div class="panel-head"><span class="panel-title">Fit score breakdown</span><span class="score score-<%= score.band.toLowerCase() %>"><b><%= score.total %></b>/100</span></div>
+        <div class="panel-head"><span class="panel-title">Détail du score de fit</span><span class="score score-<%= score.band.toLowerCase() %>"><b><%= score.total %></b>/100</span></div>
         <div class="score-bars">
           <% score.components.forEach(function(c){ %>
             <div class="score-bar-row">
@@ -70,19 +70,19 @@
 
       <section class="panel" id="brief">
         <div class="panel-head">
-          <span class="panel-title">Acquisition brief</span>
+          <span class="panel-title">Brief d’acquisition</span>
           <form method="post" action="/app/briefs/generate" class="inline-form">
             <input type="hidden" name="company_id" value="<%= company.id %>">
-            <button class="btn btn-sm <%= brief ? '' : 'btn-gold' %>"><%= brief ? 'Regenerate' : 'Generate brief' %></button>
+            <button class="btn btn-sm <%= brief ? '' : 'btn-gold' %>"><%= brief ? 'Régénérer' : 'Générer le brief' %></button>
           </form>
         </div>
         <% if (brief) { %>
           <div class="brief"><%- fmt.mdLite(brief.content) %></div>
-          <div class="brief-meta">Generated <%= fmt.timeAgo(brief.created_at) %> · model: <%= brief.model %> · every claim links to a primary source</div>
+          <div class="brief-meta">Généré <%= fmt.timeAgo(brief.created_at) %> · modèle : <%= brief.model %> · chaque affirmation renvoie à une source primaire</div>
         <% } else { %>
           <div class="empty">
-            <h3>No brief yet</h3>
-            <p>Generate a sourced acquisition brief from this target's fundamentals and signal trail.</p>
+            <h3>Pas encore de brief</h3>
+            <p>Générez un brief d’acquisition sourcé à partir des fondamentaux et de la piste des signaux de cette cible.</p>
           </div>
         <% } %>
       </section>
@@ -90,8 +90,8 @@
 
     <div class="grid">
     <section class="panel">
-      <div class="panel-head"><span class="panel-title">Key people</span></div>
-      <p class="page-sub" style="margin:-0.4rem 0 0.9rem;font-size:0.78rem;">Who to approach — identity &amp; role from registry officers; email, LinkedIn &amp; personal contact via enrichment.</p>
+      <div class="panel-head"><span class="panel-title">Personnes clés</span></div>
+      <p class="page-sub" style="margin:-0.4rem 0 0.9rem;font-size:0.78rem;">Qui approcher — identité &amp; rôle issus des dirigeants au registre ; e-mail, LinkedIn &amp; contact perso via enrichissement.</p>
       <% contacts.forEach(function(p){ %>
         <div class="contact">
           <div class="contact-id">
@@ -100,23 +100,23 @@
           </div>
           <div class="contact-lines">
             <% if (p.email) { %><a class="contact-link" href="mailto:<%= p.email %>"><%= p.email %></a><% } %>
-            <% if (p.personal_email) { %><a class="contact-link" href="mailto:<%= p.personal_email %>">personal: <%= p.personal_email %></a><% } %>
+            <% if (p.personal_email) { %><a class="contact-link" href="mailto:<%= p.personal_email %>">perso : <%= p.personal_email %></a><% } %>
             <% if (p.phone) { %><span class="contact-link"><%= p.phone %></span><% } %>
             <% if (p.linkedin_url) { %><a class="contact-link" href="<%= p.linkedin_url %>" target="_blank" rel="noopener">LinkedIn ↗</a><% } %>
-            <% if (!p.email && !p.personal_email && !p.linkedin_url) { %><span class="reg-chip">enrichment pending</span><% } %>
+            <% if (!p.email && !p.personal_email && !p.linkedin_url) { %><span class="reg-chip">enrichissement en attente</span><% } %>
           </div>
           <div class="contact-foot">
-            <% if (p.confidence) { %><span class="sev-chip <%= p.confidence === 'high' ? 'medium' : 'low' %>" style="text-transform:none;"><%= p.confidence %></span><% } %>
-            <% if (p.source_url) { %><a class="src-link" href="<%= p.source_url %>" target="_blank" rel="noopener"><%= p.source || 'registry' %></a><% } else if (p.source) { %><span class="reg-chip"><%= p.source %></span><% } %>
+            <% if (p.confidence) { %><span class="sev-chip <%= p.confidence === 'high' ? 'medium' : 'low' %>" style="text-transform:none;"><%= ({ high: 'élevée', medium: 'moyenne', low: 'faible' })[p.confidence] || p.confidence %></span><% } %>
+            <% if (p.source_url) { %><a class="src-link" href="<%= p.source_url %>" target="_blank" rel="noopener"><%= p.source || 'registre' %></a><% } else if (p.source) { %><span class="reg-chip"><%= p.source %></span><% } %>
           </div>
         </div>
       <% }) %>
     </section>
 
     <section class="panel">
-      <div class="panel-head"><span class="panel-title">Signal trail (<%= signals.length %>)</span></div>
+      <div class="panel-head"><span class="panel-title">Piste des signaux (<%= signals.length %>)</span></div>
       <% if (signals.length === 0) { %>
-        <p class="page-sub">No signals detected in the monitoring window.</p>
+        <p class="page-sub">Aucun signal détecté dans la fenêtre de veille.</p>
       <% } else { %>
         <% signals.forEach(function(a){ %>
           <div class="alert-item">
@@ -125,8 +125,8 @@
               <div class="alert-title"><%= a.title %></div>
               <% if (a.detail) { %><div class="alert-detail"><%= a.detail %></div><% } %>
               <div class="alert-foot">
-                <span class="sev-chip <%= fmt.sev(a.severity) %>"><%= a.severity %></span>
-                <span class="reg-chip"><%= fmt.title(a.type) %></span>
+                <span class="sev-chip <%= fmt.sev(a.severity) %>"><%= fmt.severity(a.severity) %></span>
+                <span class="reg-chip"><%= fmt.alertType(a.type) %></span>
                 <% if (a.source_url) { %>
                   <a class="src-link" href="<%= a.source_url %>" target="_blank" rel="noopener"><%= a.source || 'source' %></a>
                 <% } else if (a.source) { %><span class="reg-chip"><%= a.source %></span><% } %>

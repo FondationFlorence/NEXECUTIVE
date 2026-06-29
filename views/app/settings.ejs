@@ -1,23 +1,23 @@
-<%- include('../partials/app-head', { title: 'Settings — Bildup' }) %>
+<%- include('../partials/app-head', { title: 'Réglages — Bildup' }) %>
 <%- include('../partials/app-nav') %>
 
 <main class="app-shell">
   <div class="page-head">
     <div>
-      <p class="eyebrow">Account</p>
-      <h1 class="page-title">Settings</h1>
-      <p class="page-sub">Your thesis, briefing delivery, and account.</p>
+      <p class="eyebrow">Compte</p>
+      <h1 class="page-title">Réglages</h1>
+      <p class="page-sub">Votre thèse, la livraison des briefings, et votre compte.</p>
     </div>
   </div>
 
-  <% if (saved) { %><div class="toast">✓ Saved.</div><% } %>
+  <% if (saved) { %><div class="toast">✓ Enregistré.</div><% } %>
 
   <section class="panel" style="margin-bottom:1.25rem;">
-    <div class="panel-head"><span class="panel-title">Acquisition thesis</span></div>
-    <p class="page-sub" style="margin-bottom:1.25rem;">Saving refreshes your shortlist with any new matching targets.</p>
+    <div class="panel-head"><span class="panel-title">Thèse d’acquisition</span></div>
+    <p class="page-sub" style="margin-bottom:1.25rem;">Enregistrer rafraîchit votre shortlist avec les nouvelles cibles correspondantes.</p>
     <form method="post" action="/app/settings/thesis">
       <div class="form-row" style="margin-bottom:1.25rem;">
-        <label>Sectors</label>
+        <label>Secteurs</label>
         <div class="choice-grid">
           <% sectors.forEach(function(s){ %>
             <label class="choice"><input type="checkbox" name="sectors" value="<%= s %>" <%= (thesis && (thesis.sectors||[]).includes(s)) ? 'checked' : '' %>> <%= s %></label>
@@ -25,44 +25,44 @@
         </div>
       </div>
       <div class="form-row" style="margin-bottom:1.25rem;">
-        <label>Geographies</label>
+        <label>Géographies</label>
         <div class="choice-grid">
           <% countries.forEach(function(c){ %>
-            <label class="choice"><input type="checkbox" name="countries" value="<%= c %>" <%= (thesis && (thesis.countries||[]).includes(c)) ? 'checked' : '' %>> <%= c %></label>
+            <label class="choice"><input type="checkbox" name="countries" value="<%= c %>" <%= (thesis && (thesis.countries||[]).includes(c)) ? 'checked' : '' %>> <%= fmt.country(c) %></label>
           <% }) %>
         </div>
       </div>
       <div class="form-row" style="margin-bottom:1.25rem;">
-        <label>Revenue band (€M)</label>
+        <label>Tranche de CA (M€)</label>
         <div class="range-row">
           <input type="number" name="rev_min" min="0" step="0.5" placeholder="min" value="<%= thesis && thesis.rev_min ? (thesis.rev_min/1e6) : '' %>">
-          <span>to</span>
+          <span>à</span>
           <input type="number" name="rev_max" min="0" step="0.5" placeholder="max" value="<%= thesis && thesis.rev_max ? (thesis.rev_max/1e6) : '' %>">
         </div>
       </div>
       <div class="form-row" style="margin-bottom:1.5rem;">
-        <label>Keywords</label>
-        <input type="text" name="keywords" value="<%= thesis ? (thesis.keywords||'') : '' %>" placeholder="recurring revenue, succession…" style="max-width:460px;">
+        <label>Mots-clés</label>
+        <input type="text" name="keywords" value="<%= thesis ? (thesis.keywords||'') : '' %>" placeholder="revenu récurrent, succession…" style="max-width:460px;">
       </div>
-      <button type="submit" class="btn btn-gold">Save thesis &amp; refresh shortlist</button>
+      <button type="submit" class="btn btn-gold">Enregistrer la thèse &amp; rafraîchir la shortlist</button>
     </form>
   </section>
 
   <div class="grid grid-2">
     <section class="panel">
-      <div class="panel-head"><span class="panel-title">Briefing digest</span></div>
-      <p class="page-sub" style="margin-bottom:1.25rem;">How often we email a roundup of new sourced signals across your shortlist.</p>
+      <div class="panel-head"><span class="panel-title">Digest de briefing</span></div>
+      <p class="page-sub" style="margin-bottom:1.25rem;">À quelle fréquence nous vous envoyons par e-mail un récap des nouveaux signaux sourcés de votre shortlist.</p>
       <form method="post" action="/app/settings/digest" class="form-grid">
         <div class="form-row">
-          <label for="frequency">Frequency</label>
+          <label for="frequency">Fréquence</label>
           <select name="frequency" id="frequency">
-            <option value="off"    <%= digest.frequency === 'off' ? 'selected' : '' %>>Off</option>
-            <option value="daily"  <%= digest.frequency === 'daily' ? 'selected' : '' %>>Daily</option>
-            <option value="weekly" <%= digest.frequency === 'weekly' ? 'selected' : '' %>>Weekly</option>
+            <option value="off"    <%= digest.frequency === 'off' ? 'selected' : '' %>>Désactivé</option>
+            <option value="daily"  <%= digest.frequency === 'daily' ? 'selected' : '' %>>Quotidien</option>
+            <option value="weekly" <%= digest.frequency === 'weekly' ? 'selected' : '' %>>Hebdomadaire</option>
           </select>
         </div>
         <div class="form-row">
-          <label for="hour_utc">Delivery hour (UTC)</label>
+          <label for="hour_utc">Heure d’envoi (UTC)</label>
           <select name="hour_utc" id="hour_utc">
             <% for (var h = 0; h < 24; h++) { %>
               <option value="<%= h %>" <%= digest.hour_utc === h ? 'selected' : '' %>><%= String(h).padStart(2,'0') %>:00</option>
@@ -71,23 +71,23 @@
         </div>
         <div class="form-row checkbox-row">
           <input type="checkbox" name="enabled" id="enabled" <%= digest.enabled ? 'checked' : '' %>>
-          <label for="enabled" style="margin:0;">Digest enabled</label>
+          <label for="enabled" style="margin:0;">Digest activé</label>
         </div>
-        <div><button type="submit" class="btn btn-gold">Save digest</button></div>
+        <div><button type="submit" class="btn btn-gold">Enregistrer le digest</button></div>
       </form>
     </section>
 
     <section class="panel">
-      <div class="panel-head"><span class="panel-title">Account</span></div>
+      <div class="panel-head"><span class="panel-title">Compte</span></div>
       <div class="facts" style="grid-template-columns:1fr;">
-        <div><div class="fact-label">Name</div><div class="fact-value"><%= user.name || '—' %></div></div>
-        <div><div class="fact-label">Email</div><div class="fact-value"><%= user.email %></div></div>
-        <div><div class="fact-label">Plan</div><div class="fact-value">
-          <% if (trial.isPaid) { %>Active subscription<% } else if (trial.isExpired) { %>Trial ended<% } else { %>Free trial — <%= trial.daysRemaining %> day<%= trial.daysRemaining === 1 ? '' : 's' %> left<% } %>
+        <div><div class="fact-label">Nom</div><div class="fact-value"><%= user.name || '—' %></div></div>
+        <div><div class="fact-label">E-mail</div><div class="fact-value"><%= user.email %></div></div>
+        <div><div class="fact-label">Offre</div><div class="fact-value">
+          <% if (trial.isPaid) { %>Abonnement actif<% } else if (trial.isExpired) { %>Essai terminé<% } else { %>Essai gratuit — <%= trial.daysRemaining %> jour<%= trial.daysRemaining === 1 ? '' : 's' %> restant<%= trial.daysRemaining === 1 ? '' : 's' %><% } %>
         </div></div>
       </div>
       <% if (!trial.isPaid) { %>
-        <div style="margin-top:1.25rem;"><a href="/#pricing" class="btn">Upgrade plan</a></div>
+        <div style="margin-top:1.25rem;"><a href="/#pricing" class="btn">Passer à l’offre</a></div>
       <% } %>
     </section>
   </div>
