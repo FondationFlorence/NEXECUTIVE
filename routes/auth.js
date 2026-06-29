@@ -8,8 +8,8 @@ const { pool } = require('../db/index');
 
 router.post('/signup', express.json(), async (req, res) => {
   const { name, email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'email and password required' });
-  if (password.length < 8) return res.status(400).json({ error: 'password must be at least 8 characters' });
+  if (!email || !password) return res.status(400).json({ error: 'E-mail et mot de passe requis' });
+  if (password.length < 8) return res.status(400).json({ error: 'Le mot de passe doit comporter au moins 8 caractères' });
 
   try {
     const passwordHash = await bcrypt.hash(password, 10);
@@ -31,29 +31,29 @@ router.post('/signup', express.json(), async (req, res) => {
     res.status(201).json({ ok: true });
   } catch (err) {
     console.error('[auth] signup error:', err.message);
-    res.status(500).json({ error: 'Signup failed' });
+    res.status(500).json({ error: 'L’inscription a échoué' });
   }
 });
 
 router.post('/login', express.json(), async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'email and password required' });
+  if (!email || !password) return res.status(400).json({ error: 'E-mail et mot de passe requis' });
 
   try {
     const r = await pool.query(
       `SELECT id, password_hash FROM users WHERE LOWER(email) = LOWER($1)`,
       [email],
     );
-    if (!r.rows[0]) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!r.rows[0]) return res.status(401).json({ error: 'Identifiants invalides' });
 
     const valid = await bcrypt.compare(password, r.rows[0].password_hash);
-    if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!valid) return res.status(401).json({ error: 'Identifiants invalides' });
 
     req.session.userId = r.rows[0].id;
     res.json({ ok: true });
   } catch (err) {
     console.error('[auth] login error:', err.message);
-    res.status(500).json({ error: 'Login failed' });
+    res.status(500).json({ error: 'La connexion a échoué' });
   }
 });
 

@@ -72,7 +72,7 @@ app.use('/api/trial-emails', require('./routes/trial-emails'));
 app.use((err, _req, res, _next) => {
   console.error('[server] unhandled error:', err.stack || err.message);
   if (res.headersSent) return;
-  res.status(500).send('Something went wrong.');
+  res.status(500).send('Une erreur est survenue.');
 });
 
 app.listen(port, () => console.log(`Server running on port ${port}`));

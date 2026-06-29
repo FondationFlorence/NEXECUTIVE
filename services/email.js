@@ -2,8 +2,10 @@
  * Email service — sends BildUp transactional emails via Postmark REST API.
  * API key stored in POSTMARK_API_KEY env var (injected by platform).
  * Stream: 'trial-email' for tracking, tagged per email number.
+ * French-first copy (France-first audience).
  */
 const https = require('https');
+const fmt = require('../lib/format');
 
 const POSTMARK_BASE = 'api.postmarkapp.com';
 const FROM_EMAIL = 'hello@bildup.com';
@@ -12,19 +14,19 @@ const FROM_NAME = 'BildUp';
 const TRIAL_EMAILS = {
   // body can include {{name}}, {{trial_end_date}}, {{app_url}}, {{pricing_url}}
   1: {
-    subject: 'Welcome to BildUp — here’s what to do first',
+    subject: 'Bienvenue sur BildUp — par où commencer',
     stream: 'trial-welcome',
   },
   7: {
-    subject: '7 days in — what you’ve found so far',
+    subject: '7 jours après — ce que vous avez déjà trouvé',
     stream: 'trial-day7',
   },
   13: {
-    subject: 'Your BildUp trial ends tomorrow',
+    subject: 'Votre essai BildUp se termine demain',
     stream: 'trial-day13',
   },
   15: {
-    subject: 'Your trial has ended — one last chance',
+    subject: 'Votre essai est terminé — une dernière chance',
     stream: 'trial-day15',
   },
 };
@@ -61,70 +63,71 @@ function postmarkRequest(payload) {
 
 /** Build email body for a given day. */
 function buildBody(day, user, trialEndDate) {
-  const end = trialEndDate ? new Date(trialEndDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+  const end = trialEndDate ? new Date(trialEndDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
   const appUrl = 'https://bildup.com';
   const pricingUrl = 'https://bildup.com#pricing';
 
   const vars = { name: user.name || '', trial_end_date: end, app_url: appUrl, pricing_url: pricingUrl };
+  const hi = `Bonjour${vars.name ? ' ' + vars.name : ''},`;
 
   if (day === 1) {
     return `
-Hi${vars.name ? ' ' + vars.name : ''},
+${hi}
 
-Your 14-day BildUp trial is live. You now have full access to monitor M&A targets and receive AI-generated deal briefings — at no cost.
+Votre essai BildUp de 14 jours est actif. Vous avez désormais un accès complet pour surveiller des cibles M&A et recevoir des briefings d'acquisition générés par IA — sans frais.
 
-Start here: run your first search to see what BildUp surfaces for you right now.
+Commencez ici : lancez votre première recherche pour voir ce que BildUp fait remonter pour vous, dès maintenant.
 
-Run your first search → ${vars.app_url}
+Lancer ma première recherche → ${vars.app_url}
 
-Your trial runs until ${vars.trial_end_date}. No credit card needed.
+Votre essai court jusqu'au ${vars.trial_end_date}. Sans carte bancaire.
 `.trim();
   }
 
   if (day === 7) {
     return `
-Hi${vars.name ? ' ' + vars.name : ''},
+${hi}
 
-7 days in — here's where you stand.
+7 jours après — voici où vous en êtes.
 
-BildUp has been monitoring M&A signals across your target list. If you haven't tried it yet, now's the moment: alerts can be set up in under 2 minutes and deliver straight to your inbox.
+BildUp surveille les signaux M&A sur votre liste de cibles. Si vous n'avez pas encore essayé, c'est le moment : les alertes se configurent en moins de 2 minutes et arrivent directement dans votre boîte mail.
 
-7 days left in your trial. After that, your data and alerts are saved but access stops.
+Il vous reste 7 jours d'essai. Ensuite, vos données et alertes sont conservées mais l'accès s'arrête.
 
-Unlock unlimited alerts — choose your plan → ${vars.pricing_url}
+Débloquez les alertes illimitées — choisissez votre offre → ${vars.pricing_url}
 `.trim();
   }
 
   if (day === 13) {
     return `
-Hi${vars.name ? ' ' + vars.name : ''},
+${hi}
 
-Your BildUp trial ends tomorrow.
+Votre essai BildUp se termine demain.
 
-Your data, alerts, and search history are saved — but access stops unless you subscribe. No credit card will be charged automatically.
+Vos données, alertes et historique de recherche sont conservés — mais l'accès s'arrête sauf si vous vous abonnez. Aucune carte ne sera débitée automatiquement.
 
-Choose your plan:
-• Searcher — €299/mo
-• Sponsor — €999/mo
-• Firm — from €1,800/mo (sales-assisted)
+Choisissez votre offre :
+• Searcher — 299 €/mois
+• Sponsor — 999 €/mois
+• Firm — dès 1 800 €/mois (accompagné)
 
-Subscribe now → ${vars.pricing_url}
+S'abonner maintenant → ${vars.pricing_url}
 
-Need more time? Reply to this email — we'll extend it.
+Besoin de plus de temps ? Répondez à cet e-mail — nous le prolongerons.
 `.trim();
   }
 
   if (day === 15) {
     return `
-Hi${vars.name ? ' ' + vars.name : ''},
+${hi}
 
-Your BildUp trial has ended.
+Votre essai BildUp est terminé.
 
-You can rejoin anytime — your data and alerts are still here when you're ready.
+Vous pouvez revenir à tout moment — vos données et alertes sont toujours là quand vous serez prêt.
 
-Subscribe → ${vars.pricing_url}
+S'abonner → ${vars.pricing_url}
 
-We won't email you again about this trial. If you want to try again later, you're always welcome back.
+Nous ne vous écrirons plus au sujet de cet essai. Si vous voulez réessayer plus tard, vous serez toujours le bienvenu.
 `.trim();
   }
 
@@ -175,49 +178,49 @@ const APP_URL = 'https://bildup.com';
 const PRICING_URL = 'https://bildup.com#pricing';
 
 const BEHAVIORAL = {
-  activated: { subject: 'You found live targets — here’s the case to keep going', stream: 'nurture-activated' },
-  dormant:   { subject: 'A target we think fits your thesis', stream: 'nurture-dormant' },
+  activated: { subject: 'Vous avez trouvé des cibles actives — voici pourquoi continuer', stream: 'nurture-activated' },
+  dormant:   { subject: 'Une cible qui correspond à votre thèse', stream: 'nurture-dormant' },
 };
 
 function buildBehavioralBody(kind, user, ctx = {}) {
-  const hi = `Hi${user.name ? ' ' + user.name : ''},`;
+  const hi = `Bonjour${user.name ? ' ' + user.name : ''},`;
   if (kind === 'activated') {
     return `
 ${hi}
 
-You've put ${ctx.shortlistCount || 'several'} targets on your shortlist and started working them — that's exactly the point.
+Vous avez ajouté ${ctx.shortlistCount || 'plusieurs'} cibles à votre shortlist et commencé à les travailler — c'est exactement l'objectif.
 
-Here's the case to keep going: a single proprietary, sourced lead that closes is worth orders of magnitude more than the subscription. BildUp keeps monitoring every target on your list and flags the next ownership, succession, or deal signal the moment it's filed — each one linked to the primary source so you can act with conviction.
+Voici pourquoi continuer : un seul lead propriétaire et sourcé qui aboutit vaut bien plus que l'abonnement. BildUp continue de surveiller chaque cible de votre liste et signale le prochain signal de cession, de succession ou d'opération dès qu'il est déposé — chacun relié à sa source primaire pour que vous agissiez avec conviction.
 
-Lock in your access before the trial ends → ${PRICING_URL}
+Sécurisez votre accès avant la fin de l'essai → ${PRICING_URL}
 
-Reply if you want a hand sharpening your thesis.
+Répondez si vous voulez un coup de main pour affiner votre thèse.
 `.trim();
   }
   // dormant
   const ex = ctx.example;
   const exampleBlock = ex
-    ? `Based on your thesis, here's one that stands out:
+    ? `D'après votre thèse, en voici une qui sort du lot :
 
-• ${ex.name} — ${ex.sector}, ${ex.country}
+• ${ex.name} — ${ex.sector}, ${fmt.country(ex.country)}
   ${ex.reason}
-  Fit score ${ex.score}/100. Every signal traces to ${ex.source || 'an official registry'}.
+  Score de fit ${ex.score}/100. Chaque signal remonte à ${ex.source || 'un registre officiel'}.
 
-See the full sourced brief → ${APP_URL}/company/${ex.slug}`
-    : `Tell us your thesis and we'll show you matching targets instantly — each traced to an official source.
+Voir le brief sourcé complet → ${APP_URL}/company/${ex.slug}`
+    : `Donnez-nous votre thèse et nous vous montrons des cibles correspondantes instantanément — chacune reliée à une source officielle.
 
-Build your shortlist → ${APP_URL}/onboarding`;
+Construisez votre shortlist → ${APP_URL}/onboarding`;
 
   return `
 ${hi}
 
-You haven't run your thesis yet — so here's the value up front, no work required.
+Vous n'avez pas encore lancé votre thèse — alors voici la valeur d'emblée, sans effort.
 
 ${exampleBlock}
 
-That's the whole idea: you give us the mandate, we surface targets you can verify. Off-market businesses with real succession signals, not recycled broker listings.
+C'est toute l'idée : vous nous donnez le mandat, nous faisons remonter des cibles que vous pouvez vérifier. Des entreprises hors-marché avec de vrais signaux de succession, pas des annonces d'intermédiaires recyclées.
 
-${ex ? 'Build your full shortlist → ' + APP_URL + '/onboarding' : ''}
+${ex ? 'Construisez votre shortlist complète → ' + APP_URL + '/onboarding' : ''}
 `.trim();
 }
 

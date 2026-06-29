@@ -17,11 +17,11 @@ router.get('/success', (req, res) => {
 
   const body = `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payment Confirmed — BildUp</title>
+  <title>Paiement confirmé — BildUp</title>
   <style>
     body { font-family: 'DM Sans', sans-serif; background: #F5EFEA; color: #0F2D1F; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
     .card { background: #fff; border-radius: 12px; padding: 3rem; max-width: 480px; text-align: center; box-shadow: 0 4px 24px rgba(15,45,31,0.08); }
@@ -35,9 +35,9 @@ router.get('/success', (req, res) => {
 <body>
   <div class="card">
     <div class="icon">&#10004;</div>
-    <h1>Payment Confirmed</h1>
-    <p>Thank you! Your subscription is active. BildUp is now monitoring your shortlist and sourcing new targets — every signal traced to its source.</p>
-    <a href="/">Back to BildUp</a>
+    <h1>Paiement confirmé</h1>
+    <p>Merci ! Votre abonnement est actif. BildUp surveille désormais votre shortlist et source de nouvelles cibles — chaque signal relié à sa source.</p>
+    <a href="/">Retour sur BildUp</a>
   </div>
 </body>
 </html>
