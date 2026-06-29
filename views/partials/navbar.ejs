@@ -1,18 +1,18 @@
 <nav class="navbar">
   <div class="navbar-inner">
     <span class="nav-logo"><img src="/brand/bildup-mark.svg" alt="" width="22" height="22" style="vertical-align:-5px;margin-right:8px">Bildup</span>
-    <span class="nav-tagline">Sourced acquisition intelligence</span>
+    <span class="nav-tagline">Intelligence d'acquisition sourcée</span>
     <% if (userId) { %>
       <div style="display:flex;align-items:center;gap:1.5rem;">
-        <a href="/dashboard" style="font-size:0.82rem;color:var(--text-secondary);text-decoration:none;font-weight:500;transition:color 0.15s ease;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-secondary)'">Dashboard</a>
+        <a href="/dashboard" style="font-size:0.82rem;color:var(--text-secondary);text-decoration:none;font-weight:500;transition:color 0.15s ease;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-secondary)'">Tableau de bord</a>
         <form method="post" action="/api/auth/logout" style="margin:0;">
-          <button type="submit" style="font-size:0.82rem;color:var(--text-muted);background:none;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:500;transition:color 0.15s ease;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-muted)'">Sign Out</button>
+          <button type="submit" style="font-size:0.82rem;color:var(--text-muted);background:none;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:500;transition:color 0.15s ease;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-muted)'">Déconnexion</button>
         </form>
       </div>
     <% } else { %>
       <div style="display:flex;align-items:center;gap:1.25rem;">
-        <a href="/login" style="font-size:0.82rem;color:var(--text-secondary);text-decoration:none;font-weight:500;transition:color 0.15s ease;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-secondary)'">Sign In</a>
-        <a href="/signup" style="padding:0.5rem 1.1rem;background:var(--gold);color:var(--navy-deep);border-radius:5px;font-size:0.8rem;font-weight:600;text-decoration:none;transition:background 0.15s ease,box-shadow 0.15s ease;letter-spacing:0.02em;" onmouseover="this.style.background='var(--gold-bright)';this.style.boxShadow='0 0 16px rgba(39,86,201,0.25)'" onmouseout="this.style.background='var(--gold)';this.style.boxShadow='none'">Start Free Trial</a>
+        <a href="/login" style="font-size:0.82rem;color:var(--text-secondary);text-decoration:none;font-weight:500;transition:color 0.15s ease;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-secondary)'">Connexion</a>
+        <a href="/signup" style="padding:0.5rem 1.1rem;background:var(--gold);color:var(--navy-deep);border-radius:5px;font-size:0.8rem;font-weight:600;text-decoration:none;transition:background 0.15s ease,box-shadow 0.15s ease;letter-spacing:0.02em;" onmouseover="this.style.background='var(--gold-bright)';this.style.boxShadow='0 0 16px rgba(39,86,201,0.25)'" onmouseout="this.style.background='var(--gold)';this.style.boxShadow='none'">Essai gratuit</a>
       </div>
     <% } %>
   </div>

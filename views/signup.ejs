@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Start Your Free Trial — Bildup</title>
+  <title>Démarrez votre essai gratuit — Bildup</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -124,33 +124,33 @@
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-logo">Bildup</div>
-      <div class="auth-tagline">Sourced acquisition intelligence</div>
+      <div class="auth-tagline">Intelligence d'acquisition sourcée</div>
 
-      <div class="trial-badge">&#10003; 14-day free trial — no credit card</div>
+      <div class="trial-badge">&#10003; Essai gratuit de 14 jours — sans carte bancaire</div>
 
-      <h1 class="auth-headline">Start your free trial</h1>
-      <p class="auth-sub">Full access for 14 days. No charge until you subscribe.</p>
+      <h1 class="auth-headline">Démarrez votre essai gratuit</h1>
+      <p class="auth-sub">Accès complet pendant 14 jours. Aucun débit avant souscription.</p>
 
       <form id="signup-form" method="post" action="/api/auth/signup">
         <div class="form-group">
-          <label class="form-label" for="name">Full Name</label>
-          <input class="form-input" type="text" id="name" name="name" placeholder="Alexandra Chen" autocomplete="name" required>
+          <label class="form-label" for="name">Nom complet</label>
+          <input class="form-input" type="text" id="name" name="name" placeholder="Camille Durand" autocomplete="name" required>
         </div>
         <div class="form-group">
-          <label class="form-label" for="email">Work Email</label>
-          <input class="form-input" type="email" id="email" name="email" placeholder="alex@firm.com" autocomplete="email" required>
+          <label class="form-label" for="email">E-mail professionnel</label>
+          <input class="form-input" type="email" id="email" name="email" placeholder="vous@entreprise.fr" autocomplete="email" required>
         </div>
         <div class="form-group">
-          <label class="form-label" for="password">Password</label>
-          <input class="form-input" type="password" id="password" name="password" placeholder="Minimum 8 characters" minlength="8" required>
+          <label class="form-label" for="password">Mot de passe</label>
+          <input class="form-input" type="password" id="password" name="password" placeholder="8 caractères minimum" minlength="8" required>
           <p class="form-error" id="password-error"></p>
         </div>
         <p class="form-error" id="form-error"></p>
-        <button class="auth-submit" type="submit">Start Free Trial</button>
+        <button class="auth-submit" type="submit">Démarrer l'essai gratuit</button>
       </form>
 
       <div class="auth-footer">
-        Already have an account? <a href="/login">Sign in</a>
+        Vous avez déjà un compte ? <a href="/login">Se connecter</a>
       </div>
     </div>
   </div>
@@ -172,7 +172,7 @@
       };
 
       if (data.password.length < 8) {
-        passwordError.textContent = 'Password must be at least 8 characters';
+        passwordError.textContent = 'Le mot de passe doit comporter au moins 8 caractères';
         passwordError.classList.add('visible');
         return;
       }
@@ -189,11 +189,11 @@
           window.location.href = '/onboarding';
         } else {
           const body = await res.json().catch(() => ({}));
-          formError.textContent = body.error || 'Signup failed. Please try again.';
+          formError.textContent = body.error || "L'inscription a échoué. Veuillez réessayer.";
           formError.classList.add('visible');
         }
       } catch (err) {
-        formError.textContent = 'Network error. Please check your connection and try again.';
+        formError.textContent = 'Erreur réseau. Vérifiez votre connexion et réessayez.';
         formError.classList.add('visible');
       }
     });

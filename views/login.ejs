@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In — Bildup</title>
+  <title>Connexion — Bildup</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -111,26 +111,26 @@
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-logo">Bildup</div>
-      <div class="auth-tagline">Sourced acquisition intelligence</div>
+      <div class="auth-tagline">Intelligence d'acquisition sourcée</div>
 
-      <h1 class="auth-headline">Welcome back</h1>
-      <p class="auth-sub">Sign in to continue your free trial.</p>
+      <h1 class="auth-headline">Bon retour</h1>
+      <p class="auth-sub">Connectez-vous pour poursuivre votre essai gratuit.</p>
 
       <form id="login-form" method="post" action="/api/auth/login">
         <div class="form-group">
-          <label class="form-label" for="email">Work Email</label>
-          <input class="form-input" type="email" id="email" name="email" placeholder="alex@firm.com" autocomplete="email" required>
+          <label class="form-label" for="email">E-mail professionnel</label>
+          <input class="form-input" type="email" id="email" name="email" placeholder="vous@entreprise.fr" autocomplete="email" required>
         </div>
         <div class="form-group">
-          <label class="form-label" for="password">Password</label>
-          <input class="form-input" type="password" id="password" name="password" placeholder="Your password" required>
+          <label class="form-label" for="password">Mot de passe</label>
+          <input class="form-input" type="password" id="password" name="password" placeholder="Votre mot de passe" required>
         </div>
         <p class="form-error" id="form-error"></p>
-        <button class="auth-submit" type="submit">Sign In</button>
+        <button class="auth-submit" type="submit">Se connecter</button>
       </form>
 
       <div class="auth-footer">
-        Don't have an account? <a href="/signup">Start free trial</a>
+        Pas encore de compte ? <a href="/signup">Démarrer l'essai gratuit</a>
       </div>
     </div>
   </div>
@@ -160,11 +160,11 @@
           window.location.href = '/dashboard';
         } else {
           const body = await res.json().catch(() => ({}));
-          formError.textContent = body.error || 'Invalid credentials. Please try again.';
+          formError.textContent = body.error || 'Identifiants invalides. Veuillez réessayer.';
           formError.classList.add('visible');
         }
       } catch (err) {
-        formError.textContent = 'Network error. Please check your connection and try again.';
+        formError.textContent = 'Erreur réseau. Vérifiez votre connexion et réessayez.';
         formError.classList.add('visible');
       }
     });
