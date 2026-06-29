@@ -81,6 +81,13 @@ body::before {
 
 ::selection { background: var(--gold); color: var(--navy-deep); }
 
+/* ===== TRUST BAR (buyer-side) ===== */
+.trustbar { background: var(--accent); padding: 2.25rem 2rem; position: relative; z-index: 1; }
+.trustbar-inner { max-width: 880px; margin: 0 auto; text-align: center; }
+.trustbar-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); margin-bottom: 0.7rem; }
+.trustbar-line { font-family: 'Spectral', serif; font-size: clamp(1.1rem, 2.2vw, 1.5rem); font-weight: 500; line-height: 1.45; color: #fff; }
+.trustbar-line strong { color: #fff; border-bottom: 2px solid rgba(255, 255, 255, 0.55); }
+
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--navy-deep); }
 ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
