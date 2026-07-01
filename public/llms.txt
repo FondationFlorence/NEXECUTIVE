@@ -1,0 +1,33 @@
+# BildUp
+
+> Sourced acquisition intelligence for searchers and independent buyers. BildUp surfaces off-market, owner-operated European businesses with real succession signals, ranks them against your acquisition thesis, and traces every signal to its primary source.
+
+## What it is
+- A tool for ONE buyer acquiring ONE business: self-funded searchers, search funds, ETA (entrepreneurship through acquisition), independent sponsors, and acquisitive family offices.
+- Coverage: lower-mid-market companies across France first, expanding to the Benelux, then Switzerland & Germany, then Morocco & Italy — deep, not wide.
+- Verifiability is the product: every signal links to an official document, so any claim can be checked.
+- 100% buyer-side: BildUp is never mandated by a seller and never resells your deal flow.
+- Beyond sourcing: cross-border build-up / roll-up suggestions, profitability-uplift levers, deep due diligence, and a vetted deal team (M&A lawyer, due diligence, financing, IT modernisation) at negotiated rates — introduced when you need them.
+
+## Primary sources
+- Ownership & succession signals (France, the launch market): Infogreffe, BODACC, and the INPI national registry (RNE).
+- Expansion markets use each country's official registry: KVK (Netherlands), BCE/KBO (Belgium), RCS (Luxembourg), Zefix (Switzerland), Handelsregister (Germany), OMPIC (Morocco), Registro Imprese (Italy).
+- Deal & market activity: CFNEWS.
+
+## How it works
+1. Set your acquisition thesis: sectors, geographies, revenue band, keywords.
+2. Get a ranked, sourced shortlist of matching targets immediately.
+3. Generate a deal brief in which every claim links to its primary document.
+4. Track targets through a pipeline: sourced → screening → diligence → term sheet → close.
+
+## Pricing
+- Searcher — €299/month (€2,990/year)
+- Sponsor — €999/month (€9,990/year)
+- Firm — from €1,800/month (sales-assisted, custom contract)
+- Searcher and Sponsor are self-serve with a 14-day free trial. No credit card required.
+
+## Links
+- Home: https://bildup.com/
+- Pricing & FAQ: https://bildup.com/#pricing
+- Start free: https://bildup.com/signup
+- Contact: hello@bildup.com

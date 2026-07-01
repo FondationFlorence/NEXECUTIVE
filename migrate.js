@@ -61,7 +61,7 @@ async function migrate() {
  */
 async function runCoreMigrations(client) {
   // Users table with subscription support
-  // Used by Polsia for syncing end-user subscription status
+  // Subscription fields are synced from the billing provider (e.g. Stripe).
   await client.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
@@ -70,13 +70,24 @@ async function runCoreMigrations(client) {
       password_hash VARCHAR(255),
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW(),
-      -- Subscription fields (synced by Polsia when customer subscribes)
+      -- Subscription fields (synced from the billing provider on subscribe)
       stripe_subscription_id VARCHAR(255),
       subscription_status VARCHAR(50),
       subscription_plan VARCHAR(255),
       subscription_expires_at TIMESTAMPTZ,
       subscription_updated_at TIMESTAMPTZ
     )
+  `);
+
+  // Trial fields used by the signup flow + email automation.
+  // Added via ALTER so existing databases pick them up too (CREATE IF NOT
+  // EXISTS above will not add columns to an already-existing users table).
+  await client.query(`
+    ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS trial_start_date      TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS email_sequence_sent   INTEGER NOT NULL DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS activated_at          TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS behavioral_email_sent INTEGER NOT NULL DEFAULT 0
   `);
 
   // Unique constraint on email (required for UPSERT)

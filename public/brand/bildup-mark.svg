@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Bildup mark">
+  <rect width="200" height="200" rx="44" fill="#2756C9"></rect>
+  <rect x="48" y="62" width="60" height="18" rx="9" fill="#ffffff" fill-opacity="0.95"></rect>
+  <rect x="48" y="98" width="90" height="18" rx="9" fill="#ffffff" fill-opacity="0.70"></rect>
+  <rect x="48" y="134" width="112" height="18" rx="9" fill="#ffffff" fill-opacity="0.42"></rect>
+</svg>

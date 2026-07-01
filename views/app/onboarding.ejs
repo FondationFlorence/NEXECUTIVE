@@ -1,0 +1,52 @@
+<%- include('../partials/app-head', { title: 'Votre thèse — BildUp' }) %>
+<%- include('../partials/app-nav') %>
+
+<main class="app-shell">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Commencez ici · 60 secondes</p>
+      <h1 class="page-title">Que recherchez-vous ?</h1>
+      <p class="page-sub">Donnez-nous votre thèse d’acquisition et nous vous renvoyons une shortlist classée parmi <%= total %> cibles suivies — chacune reliée à une source officielle. Sans attente.</p>
+    </div>
+  </div>
+
+  <form method="post" action="/onboarding" class="panel" style="max-width:760px;">
+    <div class="form-row" style="margin-bottom:1.5rem;">
+      <label>Secteurs <span style="color:var(--text-muted);text-transform:none;letter-spacing:0;">(au choix — laissez vide pour tout)</span></label>
+      <div class="choice-grid">
+        <% sectors.forEach(function(s){ %>
+          <label class="choice"><input type="checkbox" name="sectors" value="<%= s %>" <%= (thesis && (thesis.sectors||[]).includes(s)) ? 'checked' : '' %>> <%= s %></label>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-bottom:1.5rem;">
+      <label>Géographies</label>
+      <div class="choice-grid">
+        <% countries.forEach(function(c){ %>
+          <label class="choice"><input type="checkbox" name="countries" value="<%= c %>" <%= (thesis && (thesis.countries||[]).includes(c)) ? 'checked' : '' %>> <%= fmt.country(c) %></label>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-bottom:1.5rem;">
+      <label>Tranche de CA (M€)</label>
+      <div class="range-row">
+        <input type="number" name="rev_min" min="0" step="0.5" placeholder="min" value="<%= thesis && thesis.rev_min ? (thesis.rev_min/1e6) : '' %>">
+        <span>à</span>
+        <input type="number" name="rev_max" min="0" step="0.5" placeholder="max" value="<%= thesis && thesis.rev_max ? (thesis.rev_max/1e6) : '' %>">
+        <span>M€ de CA</span>
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-bottom:1.75rem;">
+      <label>Mots-clés de thèse <span style="color:var(--text-muted);text-transform:none;letter-spacing:0;">(optionnel)</span></label>
+      <input type="text" name="keywords" placeholder="ex. revenu récurrent, succession, services peu capitalistiques" value="<%= thesis ? (thesis.keywords||'') : '' %>" style="width:100%;">
+    </div>
+
+    <button type="submit" class="btn btn-gold">Montrez-moi mes cibles →</button>
+    <p class="verify-note" style="margin-top:1rem;">🔒 Chaque signal renvoie à sa source primaire — Infogreffe, BODACC, INPI, CFNEWS.</p>
+  </form>
+</main>
+</body>
+</html>

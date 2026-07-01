@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 200" width="640" height="200" role="img" aria-label="Bildup">
+  <defs>
+    
+    <mask id="bars" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
+      <rect width="200" height="200" rx="44" fill="#ffffff"></rect>
+      <rect x="48" y="62" width="60" height="18" rx="9" fill="#000000"></rect>
+      <rect x="48" y="98" width="90" height="18" rx="9" fill="#000000"></rect>
+      <rect x="48" y="134" width="112" height="18" rx="9" fill="#000000"></rect>
+    </mask>
+  </defs>
+  <g transform="translate(0,40) scale(0.6)">
+    <rect width="200" height="200" rx="44" fill="#FFFFFF" mask="url(#bars)"></rect>
+  </g>
+  <text x="150" y="100" dominant-baseline="central" font-family="Spectral, Georgia, serif" font-weight="500" font-size="76" letter-spacing="-1" fill="#FFFFFF">Bildup</text>
+</svg>

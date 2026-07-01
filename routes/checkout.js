@@ -5,30 +5,9 @@
 const express = require('express');
 const router = express.Router();
 
-const pixelHelper = `
-<script src="/js/pixel.js"></script>
-<script>
-(function () {
-  var params = new URLSearchParams(window.location.search);
-  var amount = params.get('amount') || '0';
-  var currency = params.get('currency') || 'EUR';
-  var plan = params.get('plan') || 'unknown';
-  var billing = params.get('billing') || 'annual';
-
-  if (typeof window._nexecutivePixel !== 'undefined') {
-    var amountNum = parseFloat(amount);
-    if (!isNaN(amountNum)) {
-      window._nexecutivePixel.firePurchase(amountNum, currency, plan, billing);
-    }
-  }
-})();
-</script>
-`;
-
 // Stripe webhook endpoint
 router.post('/webhook/stripe', express.raw({ type: 'application/json' }), (req, res) => {
-  // Webhook handler would go here for production Stripe integration
-  // For now, the success page fires Purchase via pixel.js
+  // Webhook handler would go here for production Stripe integration.
   res.json({ received: true });
 });
 
@@ -38,11 +17,11 @@ router.get('/success', (req, res) => {
 
   const body = `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payment Confirmed — Nexecutive</title>
+  <title>Paiement confirmé — BildUp</title>
   <style>
     body { font-family: 'DM Sans', sans-serif; background: #F5EFEA; color: #0F2D1F; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
     .card { background: #fff; border-radius: 12px; padding: 3rem; max-width: 480px; text-align: center; box-shadow: 0 4px 24px rgba(15,45,31,0.08); }
@@ -56,11 +35,10 @@ router.get('/success', (req, res) => {
 <body>
   <div class="card">
     <div class="icon">&#10004;</div>
-    <h1>Payment Confirmed</h1>
-    <p>Thank you! Your subscription is active. Nexecutive is now monitoring M&A targets for your team.</p>
-    <a href="/">Back to Nexecutive</a>
+    <h1>Paiement confirmé</h1>
+    <p>Merci ! Votre abonnement est actif. BildUp surveille désormais votre shortlist et source de nouvelles cibles — chaque signal relié à sa source.</p>
+    <a href="/">Retour sur BildUp</a>
   </div>
-  ${pixelHelper}
 </body>
 </html>
 `;

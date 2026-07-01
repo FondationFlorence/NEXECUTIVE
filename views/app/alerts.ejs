@@ -1,0 +1,43 @@
+<%- include('../partials/app-head', { title: 'Alertes — BildUp' }) %>
+<%- include('../partials/app-nav') %>
+
+<main class="app-shell">
+  <div class="page-head">
+    <div>
+      <p class="eyebrow">Flux de signaux</p>
+      <h1 class="page-title">Alertes sourcées</h1>
+      <p class="page-sub">Signaux M&amp;A sur votre shortlist — chacun renvoie à sa source primaire.</p>
+    </div>
+  </div>
+
+  <section class="panel">
+    <% if (alerts.length === 0) { %>
+      <div class="empty">
+        <h3>Aucun signal pour l’instant</h3>
+        <p>Construisez votre shortlist et les signaux apparaîtront ici dès qu’ils se déclenchent — chacun traçable à un document officiel.</p>
+        <p style="margin-top:1rem;"><a href="/onboarding" class="btn btn-gold">Construire ma shortlist</a></p>
+      </div>
+    <% } else { %>
+      <% alerts.forEach(function(a){ %>
+        <div class="alert-item">
+          <div class="alert-rail <%= fmt.sev(a.severity) %>"></div>
+          <div class="alert-body">
+            <div class="alert-title"><%= a.title %></div>
+            <% if (a.detail) { %><div class="alert-detail"><%= a.detail %></div><% } %>
+            <div class="alert-foot">
+              <a href="/company/<%= a.company_slug %>" class="reg-chip" style="text-decoration:none;color:var(--gold-dim)"><%= a.company_name %></a>
+              <span class="sev-chip <%= fmt.sev(a.severity) %>"><%= fmt.severity(a.severity) %></span>
+              <span class="reg-chip"><%= fmt.alertType(a.type) %></span>
+              <% if (a.source_url) { %>
+                <a class="src-link" href="<%= a.source_url %>" target="_blank" rel="noopener"><%= a.source || 'source' %></a>
+              <% } else if (a.source) { %><span class="reg-chip"><%= a.source %></span><% } %>
+              <span><%= fmt.timeAgo(a.signal_date) %></span>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </section>
+</main>
+</body>
+</html>

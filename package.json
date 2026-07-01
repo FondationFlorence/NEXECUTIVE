@@ -1,12 +1,14 @@
 {
-  "name": "express-postgres-templated",
+  "name": "bildup",
   "version": "1.0.0",
+  "description": "Autonomous M&A deal-intelligence platform — target monitoring, fit scoring, AI deal briefs, and pipeline tracking for European deal teams.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
     "build": "npm run migrate",
-    "migrate": "node migrate.js"
+    "migrate": "node migrate.js",
+    "signals": "node jobs/signal-monitor.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -1,84 +1,80 @@
 /**
- * Daily trial email scheduler.
+ * Behavioral trial nurture scheduler.
  *
- * Scans trial users and fires emails on the correct day:
- *   Day  1 → EMAIL_DAY1 bit set
- *   Day  7 → EMAIL_DAY7 bit set
- *   Day 13 → EMAIL_DAY13 bit set
- *   Day 15 → EMAIL_DAY15 bit set
+ * Replaces the old fixed-day cadence (days 1/7/13/15) with a behavior trigger:
+ * once a trial user is ≥2 days in and still hasn't paid, send ONE tailored nudge —
+ *   • activated (built a shortlist / generated a brief / worked the pipeline)
+ *       → the upgrade case
+ *   • dormant (hasn't engaged)
+ *       → a sourced example brief built from their thesis, value up front
  *
- * Run via: node jobs/trial-email-scheduler.js
- * Scheduled via: polsia.toml [[crons]]
- * Runtime guard: POLSIA_IN_PROCESS_CRONS_ENABLED (set false on Blaxel shadow)
+ * Run via:        node jobs/trial-email-scheduler.js
+ * Scheduled via:  the cron manifest  (daily)
+ * Runtime guard:  CRONS_ENABLED (set true to enable)
+ * Dry run:        EMAIL_DRY_RUN=true logs instead of sending
  */
+const { pool } = require('../db/index');
 const {
-  getUsersNeedingEmail,
-  markEmailSent,
-  EMAIL_DAY1,
-  EMAIL_DAY7,
-  EMAIL_DAY13,
-  EMAIL_DAY15,
+  getBehavioralCandidates, markBehavioralSent,
+  BEHAVIORAL_ACTIVATED, BEHAVIORAL_DORMANT,
 } = require('../db/users');
-const { sendTrialEmail } = require('../services/email');
+const watchlist = require('../db/watchlist');
+const theses = require('../db/theses');
+const { buildShortlist } = require('../services/onboarding');
+const { sendBehavioralEmail } = require('../services/email');
 
-// Guard: disable in-process cron on Blaxel shadow
-if (process.env.POLSIA_IN_PROCESS_CRONS_ENABLED !== 'true') {
-  console.log('[trial-email-scheduler] Disabled (POLSIA_IN_PROCESS_CRONS_ENABLED !== true)');
+if (process.env.CRONS_ENABLED !== 'true' && process.env.EMAIL_DRY_RUN !== 'true') {
+  console.log('[trial-nurture] Disabled (CRONS_ENABLED !== true)');
   process.exit(0);
 }
 
-async function main() {
-  console.log('[trial-email-scheduler] Starting daily trial email run');
+// Emails only ever leave on Tuesdays and Thursdays (UTC). Never any other day.
+// The cron can run daily; on other days this is a no-op. (Dry-run bypasses.)
+const SEND_DAYS = [2, 4]; // 0=Sun … 2=Tue, 4=Thu
+if (!SEND_DAYS.includes(new Date().getUTCDay()) && process.env.EMAIL_DRY_RUN !== 'true') {
+  console.log('[trial-nurture] Skipped — sends only on Tue/Thu (UTC)');
+  process.exit(0);
+}
 
-  const now = new Date();
+async function dormantExample(userId) {
+  const thesis = await theses.getForUser(userId);
+  const shortlist = await buildShortlist(thesis || {}, 1);
+  const c = shortlist[0];
+  if (!c) return null;
+  return {
+    name: c.name, slug: c.slug, sector: c.sector, country: c.country,
+    score: c.score.total, source: c.registry,
+    reason: `${c.score.drivers[0]}${c.owner_age ? ` — owner ${c.owner_age}` : ''}${c.availability ? `, ${c.availability}` : ''}.`,
+  };
+}
+
+async function main() {
+  console.log('[trial-nurture] Starting behavioral nurture run');
+  const candidates = await getBehavioralCandidates();
   let sent = 0, errors = 0;
 
-  const dayConfigs = [
-    { bit: EMAIL_DAY1,  daysAfter: 1  },
-    { bit: EMAIL_DAY7,  daysAfter: 7  },
-    { bit: EMAIL_DAY13, daysAfter: 13 },
-    { bit: EMAIL_DAY15, daysAfter: 15 },
-  ];
+  for (const user of candidates) {
+    try {
+      const activated = !!user.activated_at;
+      const kind = activated ? 'activated' : 'dormant';
+      const bit = activated ? BEHAVIORAL_ACTIVATED : BEHAVIORAL_DORMANT;
 
-  for (const { bit, daysAfter } of dayConfigs) {
-    const cutoff = new Date(now);
-    cutoff.setDate(cutoff.getDate() - daysAfter);
-    // Reset time to start of day so we match users whose trial_start_date is on that day
-    cutoff.setHours(0, 0, 0, 0);
+      const ctx = activated
+        ? { shortlistCount: await watchlist.count(user.id) }
+        : { example: await dormantExample(user.id) };
 
-    const cutoffEnd = new Date(cutoff);
-    cutoffEnd.setDate(cutoffEnd.getDate() + 1);
-
-    const users = await getUsersNeedingEmail(bit);
-
-    // Filter to users whose trial_start_date falls within today's window for this email
-    const eligible = users.filter(u => {
-      const ts = new Date(u.trial_start_date);
-      return ts >= cutoff && ts < cutoffEnd;
-    });
-
-    console.log(`[trial-email-scheduler] Day${daysAfter}: ${eligible.length} eligible users`);
-
-    for (const user of eligible) {
-      try {
-        const ok = await sendTrialEmail(user, daysAfter);
-        if (ok) {
-          await markEmailSent(user.id, bit);
-          sent++;
-        } else {
-          errors++;
-        }
-      } catch (err) {
-        console.error(`[trial-email-scheduler] Error for user ${user.id}:`, err.message);
-        errors++;
-      }
+      const ok = await sendBehavioralEmail(user, kind, ctx);
+      if (ok) { await markBehavioralSent(user.id, bit); sent++; }
+      else errors++;
+    } catch (err) {
+      console.error(`[trial-nurture] Error for user ${user.id}:`, err.message);
+      errors++;
     }
   }
 
-  console.log(`[trial-email-scheduler] Done. Sent: ${sent}, Errors: ${errors}`);
+  console.log(`[trial-nurture] Done. Candidates: ${candidates.length}, Sent: ${sent}, Errors: ${errors}`);
 }
 
-main().catch((err) => {
-  console.error('[trial-email-scheduler] Fatal:', err);
-  process.exit(1);
-});
+main()
+  .then(() => pool.end())
+  .catch((err) => { console.error('[trial-nurture] Fatal:', err.message); process.exit(1); });

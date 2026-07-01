@@ -1,8 +1,15 @@
 [project]
 name = "nexecutive"
 
-# Daily at 08:00 UTC — fires trial emails for users whose trial started N days ago
+# Daily at 08:00 UTC — behavioral trial nurture (activated → upgrade case,
+# dormant → sourced example brief). One tailored nudge per user.
 [[crons]]
-name = "trial-email-scheduler"
+name = "trial-nurture"
 schedule = "0 8 * * *"
 command = "node jobs/trial-email-scheduler.js"
+
+# Every 6 hours — autonomous monitor emits fresh M&A signals across the universe
+[[crons]]
+name = "signal-monitor"
+schedule = "0 */6 * * *"
+command = "node jobs/signal-monitor.js"
